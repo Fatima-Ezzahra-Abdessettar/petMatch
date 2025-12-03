@@ -11,11 +11,11 @@ class AuthController extends Controller
     // REGISTER
     public function register(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6'
-        ]);
+         $data = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:6|confirmed', // Ajoute 'confirmed'
+    ]);
 
         $user = User::create([
             'name' => $data['name'],
@@ -48,6 +48,11 @@ class AuthController extends Controller
         $token = $user->createToken('auth')->plainTextToken;
 
         return ['user' => $user, 'token' => $token];
+    }
+    // GET AUTHENTICATED USER
+    public function me(Request $request)
+    {
+        return response()->json($request->user());
     }
 
     // LOGOUT

@@ -67,11 +67,11 @@ export default function NavBar() {
               about
             </Link>
             <a 
-              href="#plans" 
+              href="#laterWillBeAdded" 
               className='hover:text-btnPrimary transition-colors'
               style={{ color: isDarkMode ? '#F7F5EA' : '#36332E' }}
             >
-              plans
+              laterWillBeAdded
             </a>
             <a 
               href="#reviews" 
@@ -190,7 +190,7 @@ export default function NavBar() {
                   about
                 </Link>
                 <a 
-                  href="#plans" 
+                  href="#laterWillBeAdded" 
                   onClick={closeMobileMenu}
                   className="py-2 px-3 rounded-lg transition-colors"
                   style={{
@@ -199,7 +199,7 @@ export default function NavBar() {
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(247, 245, 234, 0.1)' : 'rgba(0, 0, 0, 0.05)'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  plans
+                  laterWillBeAdded
                 </a>
                 <Link 
                   to={"/our-pets"} 
