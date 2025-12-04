@@ -23,7 +23,7 @@ export default function OurPets() {
 
   const getPets = async (): Promise<Pet[]> => {
     try {
-      const res = await axios.get("http://backend.test/api/pets");
+      const res = await axios.get("/api/pets");
       console.log("✅ API Response SUCCESS:", res.data);
       console.log("Type of res.data:", typeof res.data);
       console.log("res.data.pets:", res.data.pets);
