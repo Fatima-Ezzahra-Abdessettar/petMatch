@@ -12,6 +12,13 @@ Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10
 Route::get('/pets', [PetController::class, 'index']); 
 // un visiteur peut voir les pets mais ne peut ni favoriser ni adopter ni voir les détails
 
+// Email verification route (accessible without auth)
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->name('verification.verify');
+
+// resend verification email
+Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me/adoptions', [AdoptionApplicationController::class, 'mine']);
     Route::get('/me', [AuthController::class, 'me']);
