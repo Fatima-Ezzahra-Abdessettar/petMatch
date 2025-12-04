@@ -5,12 +5,15 @@ import { useTheme } from '~/contexts/themeContext';
 
 interface PetCardProps {
   props: {
-    id: string | number;
-    name: string;
-    profile_picture: string;
-    age: string | number;
-    breed: string;
-    description: string;
+  id: number;
+  name: string;
+  species: string | null;
+  type: string | null;
+  age: number | null;
+  gender: string;
+  profile_picture: string | null;
+  status: string;
+  description: string ;
   };
 }
 
@@ -22,7 +25,7 @@ export default function PetCard({ props }: PetCardProps) {
         <div
         className="hover:cursor-pointer relative p-4 mb-4 flex flex-col items-center rounded-xl xl:rounded-2xl w-70 h-100 bg-cover bg-center transition-shadow duration-300"
         style={{ 
-          backgroundImage: `url(${encodeURI(props.profile_picture)})`,
+          backgroundImage: `url(${props.profile_picture ? encodeURI(props.profile_picture) : ''})`,
           boxShadow: isDarkMode 
             ? '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5)' 
             : '0 20px 25px -5px rgba(163, 163, 163, 0.4), 0 8px 10px -6px rgba(163, 163, 163, 0.4)'
@@ -46,7 +49,7 @@ export default function PetCard({ props }: PetCardProps) {
                   className="font-raleway text-sm flex gap-2 font-extralight transition-colors duration-300"
                   style={{ color: isDarkMode ? '#F7F5EA' : '#36332E' }}
                 >
-                  <p>{props.breed} - </p>
+                  <p>{props.type} - </p>
                   <p>{props.age} years old </p>
                 </div>
             </div>

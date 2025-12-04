@@ -6,11 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Shelter extends Model
 {
-    protected $fillable = ['name','address','city','country','phone','email'];
+    protected $fillable = ['name', 'address', 'city', 'country', 'phone', 'email'];
 
     public function pets()
     {
         return $this->hasMany(Pet::class);
     }
+    public function admin()
+    {
+        return $this->hasOne(\App\Models\User::class);
+    }
 }
+
 

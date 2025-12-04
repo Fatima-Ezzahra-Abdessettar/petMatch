@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('pets', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('profile_picture')->nullable();
             $table->string('species')->nullable(); // ex: dog, cat
             $table->string('type')->nullable();    // ex: breed or subtype
             $table->integer('age')->nullable();
@@ -25,10 +26,14 @@ return new class extends Migration
             $table->enum('status', ['available', 'pending', 'adopted'])->default('available');
             $table->timestamps();
 
-            $table->index(['shelter_id']);
+            $table->index(['shelter_id']); // pour recupérer les animaux d'un shelter
             $table->index(['added_by']);
-            $table->index(['adopted_by']);
-            $table->index(['status']);
+            $table->index(['adopted_by']); 
+            $table->index(['status']); // pour les recherches par status
+            $table->index('species'); // pour les recherches par species
+            $table->index('type'); // pour les recherches par breed
+            $table->index('age'); // pour les recherches par plage d'age
+            $table->index(['species', 'type']); // pour les recherches combinées de species et type
         });
     }
 

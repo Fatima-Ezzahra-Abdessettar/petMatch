@@ -11,7 +11,7 @@ class PetController extends Controller
     // GET /pets - liste des animaux
     public function index()
     {
-        return Pet::with('shelter')->paginate(10);
+        return Pet::with('shelter')->get('*') ; //pagination gérée coté front end
     }
 
     // GET /pets/{id}
@@ -31,9 +31,12 @@ class PetController extends Controller
             'description' => 'nullable|string',
             'gender' => 'required|in:male,female,unknown',
             'status' => 'required|in:available,pending,adopted',
-            'shelter_id' => 'required|exists:shelters,id',
         ]);
 
+        // Assigner automatiquement le refuge de l'admin connecté
+        $data['shelter_id'] = Auth::user()->shelter_id;
+
+        // Enregistrer l'utilisateur qui ajoute
         $data['added_by'] = Auth::id();
 
         $pet = Pet::create($data);

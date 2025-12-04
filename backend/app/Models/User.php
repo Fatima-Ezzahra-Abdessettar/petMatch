@@ -71,5 +71,13 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Pet::class, 'favorites')->withTimestamps();
     }
+    public function isAdmin(): bool
+    {
+        return $this->role=='admin';
+    }
 
+    public function shelter()
+    {
+        return $this->belongsTo(Shelter::class);
+    }
 }
