@@ -262,7 +262,7 @@ export default function OurPets() {
         </motion.button>
 
         <motion.span
-          className="px-3 py-1 text-sm font-medium text-gray-700"
+          className="px-3 py-1 text-sm font-medium "
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 0.3 }}
           key={page} // Re-animate when page changes
