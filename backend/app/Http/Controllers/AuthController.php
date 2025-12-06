@@ -121,7 +121,7 @@ class AuthController extends Controller
     {
         try {
             $data = $request->validate([
-                'email' => 'required|email',
+                'email' => 'required|email', // 'email' => 'required|email|exists:users' but this gives a clear msg that says password incorrect which is a security risk,
                 'password' => 'required'
             ]);
 
@@ -182,6 +182,46 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Logout failed',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    //update profile
+    public function updateProfile(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            $data = $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
+                'password' => 'sometimes|required|string|min:6|confirmed',
+                'phone' => 'sometimes|nullable|string|max:20',
+                'address' => 'sometimes|nullable|string|max:500',
+                'avatar' => 'sometimes|nullable|url',
+
+            ]);
+
+            if (isset($data['password'])) {
+                $data['password'] = Hash::make($data['password']);
+            }
+
+            $user->update($data);
+
+            return response()->json([
+                'message' => 'Profile updated successfully',
+                'user' => $user
+            ], 200); // 200 OK
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Profile update failed',
                 'error' => $e->getMessage()
             ], 500);
         }

@@ -5,6 +5,8 @@ import { useTheme } from '~/contexts/themeContext';
 
 export default function Welcome() {
   const { isDarkMode } = useTheme();
+  
+
   return (
     <div>
       <main>
@@ -86,7 +88,7 @@ export default function Welcome() {
         transition={{ duration: 0.6 }}
       >
         <motion.img
-          src="public/catDog.png"
+          src="/catDog.png"
           alt="petMatch"
           className="w-130 sm:w-140 lg:w-150 xl:w-[90rem] h-auto transition-all duration-300"
           style={{
@@ -116,7 +118,7 @@ export default function Welcome() {
         transition={{ delay: 0.2, duration: 0.6 }}
       >
         <img 
-          src="public/AboutUsimg.png" 
+          src="/aboutUsImg.png" 
           alt="about us"  
           className="w-full max-w-md sm:max-w-lg lg:max-w-2xl h-auto transition-all duration-300"
           style={{
