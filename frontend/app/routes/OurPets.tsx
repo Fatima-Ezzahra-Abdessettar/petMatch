@@ -23,7 +23,7 @@ export default function OurPets() {
 
   const getPets = async (): Promise<Pet[]> => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/api/pets");
+      const res = await axios.get("/api/pets");
       console.log("✅ API Response SUCCESS:", res.data);
       console.log("Type of res.data:", typeof res.data);
       console.log("res.data.pets:", res.data.pets);
@@ -262,7 +262,7 @@ export default function OurPets() {
         </motion.button>
 
         <motion.span
-          className="px-3 py-1 text-sm font-medium text-gray-700"
+          className="px-3 py-1 text-sm font-medium "
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 0.3 }}
           key={page} // Re-animate when page changes
