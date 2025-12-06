@@ -42,3 +42,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Voir MES favoris
     Route::get('/me/favorites', [FavoriteController::class, 'index']); // liste des favoris de l'utilisateur connecté
 });
+
+// Routes admin protégées par le middleware 'role:admin' // uniquement accessibles aux admins // defined in CheckRole middleware 
+Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+    // Routes admin spécifiques
+    Route::post('/pets', [PetController::class, 'store']);
+    Route::put('/pets/{pet}', [PetController::class, 'update']);
+    Route::delete('/pets/{pet}', [PetController::class, 'destroy']);
+    Route::get('/pets/stats', [PetController::class, 'stats']);
+});

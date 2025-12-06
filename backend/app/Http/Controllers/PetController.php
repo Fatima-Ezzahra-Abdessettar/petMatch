@@ -24,6 +24,8 @@ class PetController extends Controller //theres no need for implementing middlew
     // POST /pets - ajouter un animal (protégé par auth)
     public function store(Request $request)
     {
+        $this->authorize('manage-pets');
+
         $data = $request->validate([
             'name' => 'required|string',
             'species' => 'required|string',
@@ -31,7 +33,7 @@ class PetController extends Controller //theres no need for implementing middlew
             'age' => 'nullable|integer',
             'description' => 'nullable|string',
             'gender' => 'required|in:male,female,unknown',
-            'status' => 'required|in:available,pending,adopted',
+            'status' => 'nullable|in:available,pending,adopted',
             'profile_picture' => 'required|image|max:2048', // 2MB
         ]);
         $path = $request->file('profile_picture')->store('pets', 'public');
@@ -90,5 +92,34 @@ class PetController extends Controller //theres no need for implementing middlew
             'pet' => $pet->fresh()
         ]);
     }
+    public function destroy(Pet $pet)
+    {
+        if (Auth::user()->shelter_id !== $pet->shelter_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
 
+        // delete image
+        if ($pet->profile_picture && str_starts_with($pet->profile_picture, '/storage/')) {
+            Storage::disk('public')->delete(
+                str_replace('/storage/', '', $pet->profile_picture)
+            );
+        }
+
+        $pet->delete();
+
+        return response()->json([
+            'message' => 'Pet deleted successfully'
+        ], 200);
+    }
+
+    // statistics for admin dashboard
+    public function stats()
+    {
+        return response()->json([
+            'total' => Pet::count(),
+            'available' => Pet::where('status', 'available')->count(),
+            'pending' => Pet::where('status', 'pending')->count(),
+            'adopted' => Pet::where('status', 'adopted')->count(),
+        ]);
+    }
 }
