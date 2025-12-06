@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "react-router build",
+    "build": "react-router build && shx cp -r public build/client/",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc"
@@ -26,6 +26,7 @@
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "json-server": "^1.0.0-beta.3",
+    "shx": "^0.4.0",
     "tailwindcss": "^4.1.12",
     "typescript": "^5.8.3",
     "vite": "^6.3.3",

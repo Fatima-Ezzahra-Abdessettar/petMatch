@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import PetCard from "~/components/petCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import api from "~/api/client";
 
 export type Pet = {
   id: number;
@@ -23,7 +24,13 @@ export default function OurPets() {
 
   const getPets = async (): Promise<Pet[]> => {
     try {
-      const res = await axios.get("http://backend.test/api/pets");
+      console.log('🔍 ENV VAR:', import.meta.env.VITE_API_URL);
+  console.log('🔍 Axios baseURL:', api.defaults.baseURL);
+  console.log('🔍 Making request to:', `${api.defaults.baseURL}/api/pets`);
+      console.log("🔍 API Base URL:", api.defaults.baseURL); // ADD THIS
+    console.log("🔍 Full URL:", `${api.defaults.baseURL}/api/pets`); // ADD THIS
+    
+      const res = await api.get("/api/pets");
       console.log("✅ API Response SUCCESS:", res.data);
       console.log("Type of res.data:", typeof res.data);
       console.log("res.data.pets:", res.data.pets);
@@ -34,10 +41,11 @@ export default function OurPets() {
         return res.data;
       } else if (res.data.pets && Array.isArray(res.data.pets)) {
         console.log("✅ Response has pets property");
-        return res.data.pets;
+        return res.data;
       } else if (res.data.data && Array.isArray(res.data.data)) {
         console.log("✅ Response has data property");
-        return res.data.data;
+        return res.data;
+
       }
       
       console.error("❌ Unexpected response structure:", res.data);
@@ -262,7 +270,7 @@ export default function OurPets() {
         </motion.button>
 
         <motion.span
-          className="px-3 py-1 text-sm font-medium text-gray-700"
+          className="px-3 py-1 text-sm font-medium "
           animate={{ scale: [1, 1.1, 1] }}
           transition={{ duration: 0.3 }}
           key={page} // Re-animate when page changes
