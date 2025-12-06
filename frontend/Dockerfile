@@ -12,6 +12,11 @@ FROM node:20-alpine AS build-env
 COPY . /app/
 COPY --from=development-dependencies-env /app/node_modules /app/node_modules
 WORKDIR /app
+
+# ADD THESE LINES HERE - BEFORE npm run build!
+ARG VITE_API_URL=http://localhost:8000
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 FROM node:20-alpine
@@ -19,4 +24,5 @@ COPY ./package.json package-lock.json /app/
 COPY --from=production-dependencies-env /app/node_modules /app/node_modules
 COPY --from=build-env /app/build /app/build
 WORKDIR /app
-CMD ["npm", "run", "start"]
+EXPOSE 3000
+CMD ["npm", "run", "start", "--", "--port", "3000"]
