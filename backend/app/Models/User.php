@@ -69,10 +69,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsToMany(Pet::class, 'favorites')->withTimestamps();
     }
+    
     public function isAdmin(): bool
     {
-        return $this->role=='admin';
+    return $this->role === 'admin';
     }
+
 
     public function shelter()
     {

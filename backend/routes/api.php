@@ -5,6 +5,7 @@ use App\Http\Controllers\PetController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\AdoptionApplicationController;
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Mail;
 
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');// 10 tentatives d'inscription / heure
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');// 10 tentatives de connexion / minute (contre brute force)
@@ -18,6 +19,13 @@ Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
 
 // resend verification email
 Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail']);
+Route::get('/test-mail', function () {
+    Mail::raw('MAIL IS WORKING 🎉', function ($m) {
+        $m->to('test@test.com')->subject('Test Mail');
+    });
+
+    return 'mail sent';
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me/adoptions', [AdoptionApplicationController::class, 'mine']);
@@ -35,4 +43,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me/favorites', [FavoriteController::class, 'index']); // liste des favoris de l'utilisateur connecté
     // for updating user profile
     Route::put('/me', [AuthController::class, 'updateProfile']);
+});
+
+// Routes admin protégées par le middleware 'role:admin' // uniquement accessibles aux admins // defined in CheckRole middleware 
+Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
+    // Routes admin spécifiques
+    Route::post('/pets', [PetController::class, 'store']);
+    Route::put('/pets/{pet}', [PetController::class, 'update']);
+    Route::delete('/pets/{pet}', [PetController::class, 'destroy']);
+    Route::get('/pets/stats', [PetController::class, 'stats']);
 });
