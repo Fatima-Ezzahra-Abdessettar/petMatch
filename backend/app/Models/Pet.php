@@ -10,6 +10,9 @@ class Pet extends Model
         'name','species','type','age','description','profile_picture',
         'shelter_id','added_by','adopted_by','gender','status'
     ];
+    protected $casts = [
+        'age' => 'integer',
+    ];
 
     public function shelter()
     {
@@ -34,6 +37,21 @@ class Pet extends Model
     public function favoritedBy()
     {
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
+    }
+    // Helper methods
+    public function belongsToShelter(int $shelterId): bool
+    {
+        return $this->shelter_id === $shelterId;
+    }
+
+    public function isAvailable(): bool
+    {
+        return $this->status === 'available';
+    }
+
+    public function isAdopted(): bool
+    {
+        return $this->status === 'adopted';
     }
 }
 
