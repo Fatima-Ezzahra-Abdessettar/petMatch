@@ -1,6 +1,10 @@
 FROM node:20-alpine AS development-dependencies-env
 COPY . /app
 WORKDIR /app
+# Install Alpine-specific native binaries
+# RUN npm install @parcel/watcher-linux-x64-musl lightningcss-linux-x64-musl --force
+# not a modification just needed to force install on alpine
+
 RUN npm ci
 
 FROM node:20-alpine AS production-dependencies-env
