@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion';
 import { useTheme } from '~/contexts/themeContext';
-
+import { Link } from "react-router";
 
 interface PetCardProps {
   props: {
@@ -60,6 +60,13 @@ export default function PetCard({ props }: PetCardProps) {
               {props.description}
             </p>
         </div>
+        <Link 
+        to={`/pets/${props.id}/adopt`}
+        className="px-4 py-2 bg-purple-700 text-white rounded-lg hover:bg-purple-800 block text-center"
+      >
+        Apply for Adoption
+      </Link>
         </div>
+        
   )
 }

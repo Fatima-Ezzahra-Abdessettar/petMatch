@@ -37,6 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/pets/{pet}', [PetController::class, 'destroy']); // supprimer un animal
     Route::resource('adoption-applications', App\Http\Controllers\AdoptionApplicationController::class)->only(['store', 'index', 'show']); // déposer une demande d'adoption, voir toutes mes demandes, voir une demande spécifique
     // Ajouter/supprimer un favori pour un animal - LOGIQUE TOGGLE
+    Route::post('/pets/{pet}/apply', [AdoptionApplicationController::class, 'store']); // apply for adopting
     Route::post('/pets/{pet}/favorites', [FavoriteController::class, 'store']); // ajouter aux favoris via toggle 
     Route::delete('/pets/{pet}/favorites', [FavoriteController::class, 'destroy']); // retirer des favoris also via toggle
     // Voir MES favoris
