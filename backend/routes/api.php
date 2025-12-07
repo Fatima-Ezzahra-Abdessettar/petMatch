@@ -33,4 +33,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/pets/{pet}/favorites', [FavoriteController::class, 'destroy']); // retirer des favoris also via toggle
     // Voir MES favoris
     Route::get('/me/favorites', [FavoriteController::class, 'index']); // liste des favoris de l'utilisateur connecté
+    // for updating user profile
+    Route::put('/me', [AuthController::class, 'updateProfile']);
 });
