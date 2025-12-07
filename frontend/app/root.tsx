@@ -8,6 +8,7 @@ import {
 } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from 'app/contexts/themeContext';
+import { UserProvider } from './contexts/UserContext';
 
 
 import type { Route } from "./+types/root";
@@ -47,18 +48,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   const Client = new QueryClient();
   return (
-    
     <QueryClientProvider client={Client}>
       <ThemeProvider>
-    <div className="min-h-screen bg-BgLight flex flex-col pt-16 ">
-      <NavBar/>
-      <div className="mt-15 pt-5 flex-grow container mx-auto px-4">
-        <Outlet />
-      </div>
-    </div>
-    </ThemeProvider>
+        <UserProvider> 
+          <div className="min-h-screen bg-BgLight flex flex-col pt-16">
+            <NavBar />
+            <div className="mt-15 pt-5 flex-grow container mx-auto px-4">
+              <Outlet />
+            </div>
+          </div>
+        </UserProvider>
+      </ThemeProvider>
     </QueryClientProvider>
-    
   );
 }
 

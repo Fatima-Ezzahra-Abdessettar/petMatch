@@ -4,5 +4,5 @@ export default [index("routes/home.tsx"),
     route("/our-pets","routes/OurPets.tsx"),
     route("/contact","routes/Contact.tsx"),
     route("/profile","routes/Profile.tsx"),
-    route("/favorites","components/FavoritesList.tsx")
-] satisfies RouteConfig;
+    route("/favorites", "routes/Favorites.tsx"),
+  ] satisfies RouteConfig;
