@@ -8,12 +8,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
 {
-    public function handle(Request $request, Closure $next): Response
+    // role can be 'user' or 'admin'... in order to have a single middleware for both roles
+    public function handle(Request $request, Closure $next, string $role): Response
     {
-        // Vérifier si l'utilisateur est authentifié ET est admin
-        if (!$request->user() || !$request->user()->isAdmin()) {
+        if (!$request->user()) {
             return response()->json([
-                'message' => 'Accès non autorisé. Seuls les admins peuvent effectuer cette action.'
+                'message' => 'Unauthenticated.'
+            ], 401);
+        }
+
+        if ($request->user()->role !== $role) {
+            return response()->json([
+                'message' => "Accès non autorisé. Cette action nécessite le rôle '{$role}'."
             ], 403);
         }
 
