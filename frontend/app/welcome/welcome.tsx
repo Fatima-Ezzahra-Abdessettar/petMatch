@@ -935,7 +935,7 @@ export default function Welcome() {
           isDarkMode ? "bg-[rgb(115,101,91,0.5)]" : "bg-[rgba(204,191,177,0.3)]"
         } py-12 lg:py-16 transition-colors duration-300`}
       >
-        <div class="w-full px-4 sm:px-8 xl:px-16 2xl:px-24">
+        <div className="w-full px-4 sm:px-8 xl:px-16 2xl:px-24">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
             <div>
               <h3
