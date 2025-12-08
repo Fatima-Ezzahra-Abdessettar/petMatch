@@ -34,7 +34,7 @@ export default function Login() {
 
     try {
       await login(formData.email, formData.password);
-      navigate("/");
+      navigate("/welcome-user");
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {

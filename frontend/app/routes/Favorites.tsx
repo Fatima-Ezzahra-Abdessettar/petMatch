@@ -5,6 +5,7 @@ import PetCard from '../components/petCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiHeart, FiFilter, FiSearch, FiX } from 'react-icons/fi';
 import type { Pet } from '../types';
+import AuthenticatedLayout from '../components/AuthenticatedLayout';
 
 export default function Favorites() {
   const { favorites, fetchFavorites, toggleFavorite } = useContext(UserContext)!;
@@ -70,8 +71,9 @@ export default function Favorites() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <AuthenticatedLayout>
+      <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -242,7 +244,8 @@ export default function Favorites() {
             </AnimatePresence>
           </motion.div>
         )}
+        </div>
       </div>
-    </div>
+    </AuthenticatedLayout>
   );
 }

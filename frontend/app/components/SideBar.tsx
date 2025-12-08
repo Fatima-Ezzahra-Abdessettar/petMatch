@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   HomeIcon,
   ClipboardDocumentListIcon,
@@ -7,7 +7,8 @@ import {
   Cog6ToothIcon,
   HeartIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 import { 
   HomeIcon as HomeIconSolid,
@@ -19,6 +20,7 @@ import {
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDog } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../contexts/auth';
 
 interface SideBarProps {
   isOpen: boolean;
@@ -26,11 +28,19 @@ interface SideBarProps {
 }
 
 const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
+
   // Configuration des liens de navigation (incluant Favorites)
   const menuItems = [
     { 
-      path: '/', 
-      label: 'Home', 
+      path: '/welcome-user', 
+      label: 'home', 
       icon: HomeIcon,
       activeIcon: HomeIconSolid,
       type: 'heroicon'
@@ -44,14 +54,14 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
     },
     { 
       path: '/pets', 
-      label: 'Pets', 
+      label: 'pets', 
       icon: faDog,
       activeIcon: faDog,
       type: 'fontawesome'
     },
     { 
       path: '/profile', 
-      label: 'Profile', 
+      label: 'profile', 
       icon: UserCircleIcon,
       activeIcon: UserCircleIconSolid,
       type: 'heroicon'
@@ -72,11 +82,9 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
     },
   ];
 
-  // Informations utilisateur
-  const user = {
-    name: 'Sara Alali',
-    email: 'demo@email.com',
-  };
+  // Get user info from auth context
+  const userName = user?.name || 'User';
+  const userEmail = user?.email || 'user@email.com';
 
   return (
     <>
@@ -95,22 +103,16 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
       <aside className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
         {/* En-tête */}
         <div className="sidebar-header">
-          <div className="logo">
-            <div className="logo-icon">🐾</div>
-            {isOpen && (
-              <>
-                <h1 className="logo-title">PetMatch</h1>
-                <button 
-                  onClick={toggleSidebar}
-                  className="close-btn"
-                  aria-label="Fermer le menu"
-                >
-                  <XMarkIcon className="icon-20" />
-                </button>
-              </>
-            )}
+          <div className="flex items-center gap-2 mb-4">
+            <button 
+              onClick={toggleSidebar}
+              className="cursor-pointer"
+              aria-label="Toggle menu"
+            >
+              <Bars3Icon className="icon-24" style={{ color: 'var(--text-normal)' }} />
+            </button>
+            {isOpen && <div className="menu-title">MENU</div>}
           </div>
-          {isOpen && <div className="menu-title">MENU</div>}
         </div>
 
         {/* Navigation principale */}
@@ -131,14 +133,14 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
                         return (
                           <>
                             <FontAwesomeIcon 
-                              icon={isActive ? item.activeIcon : item.icon} 
+                              icon={item.icon as any} 
                               className="nav-icon" 
                             />
                             {isOpen && <span className="nav-label">{item.label}</span>}
                           </>
                         );
                       } else {
-                        const Icon = isActive ? item.activeIcon : item.icon;
+                        const Icon = (isActive ? item.activeIcon : item.icon) as React.ComponentType<{ className?: string }>;
                         return (
                           <>
                             <Icon className="nav-icon" />
@@ -161,10 +163,20 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
               <UserCircleIcon className="icon-24" />
             </div>
             {isOpen && (
-              <div className="user-details">
-                <div className="user-name">{user.name}</div>
-                <div className="user-email">{user.email}</div>
-              </div>
+              <>
+                <div className="user-details">
+                  <div className="user-name">{userName}</div>
+                  <div className="user-email">{userEmail}</div>
+                </div>
+                <button 
+                  onClick={handleLogout}
+                  className="logout-btn"
+                  aria-label="Logout"
+                  title="Logout"
+                >
+                  <ArrowRightOnRectangleIcon className="icon-20" style={{ color: '#ef4444' }} />
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -386,6 +398,21 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
         .icon-24 {
           width: 24px;
           height: 24px;
+        }
+
+        .logout-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 4px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.2s;
+        }
+
+        .logout-btn:hover {
+          transform: scale(1.1);
         }
       `}</style>
     </>

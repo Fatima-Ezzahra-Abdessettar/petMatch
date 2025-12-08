@@ -1,10 +1,14 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import PersonalDetailsForm from '../components/PersonalDetailsForm';
+import type { PersonalDetailsFormHandle } from '../components/PersonalDetailsForm';
 import PasswordChangeForm from '../components/PasswordChangeForm';
+import AuthenticatedLayout from '../components/AuthenticatedLayout';
 
 const Profile: React.FC = () => {
     const context = useContext(UserContext);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const personalDetailsFormRef = useRef<PersonalDetailsFormHandle>(null);
 
     // If the context doesn't exist (no UserProvider)
     if (!context) {
@@ -12,23 +16,61 @@ const Profile: React.FC = () => {
     }
 
     const { user, favorites, fetchUser, fetchFavorites } = context;
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        fetchUser();
-        fetchFavorites();
+        const loadData = async () => {
+            setIsLoading(true);
+            await fetchUser();
+            await fetchFavorites();
+            setIsLoading(false);
+        };
+        loadData();
     }, [fetchUser, fetchFavorites]);
 
+    if (isLoading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}>
+                <div className="text-center">
+                    <div className="text-gray-600">Loading...</div>
+                </div>
+            </div>
+        );
+    }
+
     if (!user) {
-        return <div className="text-center p-10">Not Found...</div>;
+        return (
+            <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}>
+                <div className="text-center">
+                    <div className="text-gray-600 mb-4">User not found. Please log in.</div>
+                </div>
+            </div>
+        );
     }
 
     return (
-        <div className="p-6 bg-gray-100 min-h-screen">
-            <h1 className="text-3xl font-bold text-orange-600 mb-6">My Profil</h1>
-            <PersonalDetailsForm />
-            <PasswordChangeForm />
+        <AuthenticatedLayout>
+            {/* Header */}
+            <div className="flex justify-end items-center p-6 gap-4">
+                <button 
+                    onClick={() => personalDetailsFormRef.current?.submit()}
+                    className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors font-medium"
+                >
+                    Save Changes
+                </button>
+            </div>
 
-        </div>
+            {/* Main Content */}
+            <div className="px-8 pb-8">
+                <div className="mb-6">
+                    <h1 className="text-3xl font-bold text-gray-800 mb-1">Profile</h1>
+                    <p className="text-gray-600">Manage Profile</p>
+                </div>
+
+                <PersonalDetailsForm ref={personalDetailsFormRef} user={user} />
+                <PasswordChangeForm />
+            </div>
+        </AuthenticatedLayout>
     );
 };
 

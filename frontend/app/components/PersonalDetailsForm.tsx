@@ -1,36 +1,66 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useImperativeHandle, forwardRef } from 'react';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import { UserContext } from '../contexts/UserContext';
+import AvatarSelectionModal from './AvatarSelectionModal';
+import { UserCircleIcon } from '@heroicons/react/24/solid';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from '~/api/client';
 
 interface UserFormData {
     name: string;
-    email: string;
+    location: string;
     phone: string;
-    address: string;
-    bio?: string;
+    email: string;
+    avatar?: string;
 }
 
-const PersonalDetailsForm: React.FC = () => {
-    const { user, setUser } = useContext(UserContext)!;
+interface PersonalDetailsFormProps {
+    user: any;
+}
+
+export interface PersonalDetailsFormHandle {
+    submit: () => void;
+}
+
+const PersonalDetailsForm = forwardRef<PersonalDetailsFormHandle, PersonalDetailsFormProps>(({ user }, ref) => {
+    const { setUser } = useContext(UserContext)!;
+    const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+    const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || 'avatar1');
     const [isLoading, setIsLoading] = useState(false);
-    const { register, handleSubmit, formState: { errors } } = useForm<UserFormData>({ 
+    
+    const { register, handleSubmit, formState: { errors }, reset } = useForm<UserFormData>({
         defaultValues: {
             name: user?.name || '',
-            email: user?.email || '',
+            location: user?.location || '',
             phone: user?.phone || '',
-            address: user?.address || '',
-            bio: user?.bio || ''
-        } 
+            email: user?.email || '',
+            avatar: selectedAvatar
+        }
     });
+
+    // Update form when user data changes
+    React.useEffect(() => {
+        if (user) {
+            reset({
+                name: user.name || '',
+                location: user.location || '',
+                phone: user.phone || '',
+                email: user.email || '',
+                avatar: user.avatar || selectedAvatar
+            });
+            setSelectedAvatar(user.avatar || 'avatar1');
+        }
+    }, [user, reset]);
 
     const onSubmit = async (data: UserFormData) => {
         setIsLoading(true);
         try {
-            const res = await axios.put('/api/me', data);
-            setUser({ ...user, ...res.data.user });
+            const res = await api.put('/api/me', { ...data, avatar: selectedAvatar });
+            if (setUser) {
+                setUser({ ...user, ...res.data.user, avatar: selectedAvatar });
+            }
             toast.success('Profile updated successfully!', {
                 position: 'top-right',
                 autoClose: 3000,
@@ -46,53 +76,82 @@ const PersonalDetailsForm: React.FC = () => {
         }
     };
 
+    useImperativeHandle(ref, () => ({
+        submit: () => {
+            handleSubmit(onSubmit)();
+        }
+    }));
+
+    const handleAvatarSelect = (avatar: string) => {
+        setSelectedAvatar(avatar);
+        setIsAvatarModalOpen(false);
+        if (setUser) {
+            setUser({ ...user, avatar });
+        }
+    };
+
+    // Sample avatar options - you can replace these with actual avatar images
+    const avatarOptions = [
+        'avatar1', 'avatar2', 'avatar3', 'avatar4', 
+        'avatar5', 'avatar6', 'avatar7', 'avatar8', 'avatar9'
+    ];
+
     return (
-        <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-6">Personal Information</h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <>
+            <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 className="text-xl font-semibold text-gray-800 mb-6">Personal Details</h2>
+                
+                {/* Avatar Section */}
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Photo</label>
+                    <div className="flex items-center gap-4">
+                        <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                            <UserCircleIcon className="w-20 h-20 text-gray-400" />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setIsAvatarModalOpen(true)}
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+                        >
+                            Change avatar
+                        </button>
+                    </div>
+                </div>
+
+                {/* Form Fields */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                            Full Name *
+                            Full Name
                         </label>
                         <input
                             id="name"
                             type="text"
-                            {...register('name', { required: 'Name is required' })}
+                            {...register('name')}
                             className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
                                 errors.name ? 'border-red-500' : 'border-gray-300'
                             }`}
                         />
-                        {errors.name && (
-                            <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                        )}
                     </div>
 
                     <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                            Email Address *
+                        <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+                            Location
                         </label>
-                        <input
-                            id="email"
-                            type="email"
-                            {...register('email', {
-                                required: 'Email is required',
-                                pattern: {
-                                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                    message: 'Invalid email address',
-                                },
-                            })}
-                            className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
-                                errors.email ? 'border-red-500' : 'border-gray-300'
-                            }`}
-                        />
-                        {errors.email && (
-                            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                        )}
+                        <select
+                            id="location"
+                            {...register('location')}
+                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                        >
+                            <option value="">Select Location</option>
+                            <option value="casablanca">Casablanca</option>
+                            <option value="rabat">Rabat</option>
+                            <option value="marrakech">Marrakech</option>
+                            <option value="fes">Fes</option>
+                            <option value="tanger">Tanger</option>
+                        </select>
                     </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
                             Phone Number
@@ -106,45 +165,39 @@ const PersonalDetailsForm: React.FC = () => {
                     </div>
 
                     <div>
-                        <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">
-                            Address
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                            Email Address
                         </label>
                         <input
-                            id="address"
-                            type="text"
-                            {...register('address')}
-                            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            id="email"
+                            type="email"
+                            {...register('email', {
+                                pattern: {
+                                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                    message: 'Invalid email address',
+                                },
+                            })}
+                            className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                                errors.email ? 'border-red-500' : 'border-gray-300'
+                            }`}
                         />
                     </div>
                 </div>
+            </div>
 
-                <div>
-                    <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
-                        About Me
-                    </label>
-                    <textarea
-                        id="bio"
-                        rows={3}
-                        {...register('bio')}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="Tell us a bit about yourself..."
-                    />
-                </div>
-
-                <div className="flex justify-end pt-4">
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className={`px-6 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 ${
-                            isLoading ? 'opacity-75 cursor-not-allowed' : ''
-                        }`}
-                    >
-                        {isLoading ? 'Saving...' : 'Save Changes'}
-                    </button>
-                </div>
-            </form>
-        </div>
+            {isAvatarModalOpen && (
+                <AvatarSelectionModal
+                    isOpen={isAvatarModalOpen}
+                    onClose={() => setIsAvatarModalOpen(false)}
+                    onSelect={handleAvatarSelect}
+                    currentAvatar={selectedAvatar}
+                    avatars={avatarOptions}
+                />
+            )}
+        </>
     );
-};
+});
+
+PersonalDetailsForm.displayName = 'PersonalDetailsForm';
 
 export default PersonalDetailsForm;

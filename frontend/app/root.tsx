@@ -5,10 +5,12 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from 'app/contexts/themeContext';
 import { AuthProvider } from "app/contexts/auth";
+import { UserProvider } from './contexts/UserContext';
 
 
 import type { Route } from "./+types/root";
@@ -45,20 +47,34 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AppContent() {
+  const location = useLocation();
+  
+  // Routes that should show NavBar (public pages)
+  const publicRoutes = ['/', '/our-pets', '/contact', '/login', '/register', '/error'];
+  const isPublicRoute = publicRoutes.includes(location.pathname);
+  
+  return (
+    <div className="min-h-screen bg-BgLight flex flex-col pt-16 ">
+      {isPublicRoute && <NavBar/>}
+      <div className={`${isPublicRoute ? 'mt-15 pt-5' : ''} flex-grow container mx-auto px-4`}>
+        <Outlet />
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const Client = new QueryClient();
   return (
     <QueryClientProvider client={Client}>
       <ThemeProvider>
         <AuthProvider>
-    <div className="min-h-screen bg-BgLight flex flex-col pt-16 ">
-      <NavBar/>
-      <div className="mt-15 pt-5 flex-grow container mx-auto px-4">
-        <Outlet />
-      </div>
-    </div>
-    </AuthProvider>
-    </ThemeProvider>
+          <UserProvider>
+            <AppContent />
+          </UserProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
