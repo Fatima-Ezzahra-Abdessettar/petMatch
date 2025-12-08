@@ -57,36 +57,40 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: isDarkMode ? '#36332E' : '#F7F5EA' }}>
-      {/* Left side - Image */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-amber-100 to-orange-100 items-center justify-center p-12">
-        <div className="max-w-md">
-          <img
-            src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=800&auto=format&fit=crop"
-            alt="Cute pets"
-            className="w-full rounded-3xl shadow-2xl object-cover"
-          />
-        </div>
-      </div>
-
-      {/* Right side - Form */}
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8" style={{ backgroundColor: isDarkMode ? '#36332E' : '#F7F5EA' }}>
+      {/* Rounded Container */}
       <div
-        className="w-full lg:w-1/2 flex items-center justify-center p-8"
-        style={{ backgroundColor: isDarkMode ? '#36332E' : '#F7F5EA' }}
+        className="w-full max-w-4xl sm:max-w-full min-h-[600px] sm:h-[800px] rounded-3xl overflow-hidden shadow-2xl"
+        style={{ backgroundColor: isDarkMode ? "rgb(115,101,91,0.31)" : "#F7F5EA" }}
       >
-        <div className="w-full max-w-md">
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-2" style={{ color: isDarkMode ? '#F5F3ED' : '#36332E' }}>
-              PET<span className="inline-flex items-center">
-                M<span className="text-amber-600">🐾</span>TCH
-              </span>
-            </h1>
-            <p className="text-lg" style={{ color: isDarkMode ? '#F7F5EA' : '#36332E' }}>welcome to petMatch</p>
+        <div className="flex flex-col lg:flex-row h-full">
+          {/* Left side - Image */}
+          <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br items-center justify-center">
+            <img
+              src="register.jpg"
+              alt="Cute pets"
+              className="w-full h-full object-cover"
+            />
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Right side - Form */}
+          <div className="lg:w-1/2 h-full flex justify-center p-8 pt-12 lg:pt-0">
+            <div className="w-full max-w-md lg:my-auto">
+              {/* Logo */}
+              <div className="flex-col justify-center items-center mb-12">
+                <img
+                  src={
+                    isDarkMode
+                      ? "public/pet-MattchWhite.PNG"
+                      : "public/pet-MattchBlack.PNG"
+                  }
+                  alt="pet"
+                  className="w-40 sm:w-30 lg:w-50 mx-auto mb-4"
+                />
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div
                 className="px-4 py-3 rounded-lg"
@@ -238,7 +242,7 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full font-semibold py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full font-semibold py-3 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               style={{
                 backgroundColor: '#d97706',
                 color: '#F7F5EA'
@@ -259,7 +263,9 @@ export default function Register() {
                 sign in
               </Link>
             </div>
-          </form>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>
