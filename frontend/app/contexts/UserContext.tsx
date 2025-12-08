@@ -1,11 +1,12 @@
 import React, { createContext, useState, useEffect, type ReactNode } from 'react';
-import axios from 'axios';
+import api, { setAuthToken } from '../api/client';
+import type { Pet } from '~/types';
 
 interface UserContextType {
     user: any | null;
-    favorites: any[];
+    favorites: Pet[];
     setUser: (user: any) => void;
-    setFavorites: (favorites: any[]) => void;
+    setFavorites: (favorites: Pet[]) => void;
     fetchUser: () => void;
     fetchFavorites: () => void;
     toggleFavorite: (petId: number, isFavorite: boolean) => void;
@@ -15,43 +16,50 @@ export const UserContext = createContext<UserContextType | undefined>(undefined)
 
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<any | null>(null);
-    const [favorites, setFavorites] = useState<any[]>([]);
+    const [favorites, setFavorites] = useState<Pet[]>([]);
 
     const fetchUser = async () => {
         try {
-            const res = await axios.get('/api/me');
+            const res = await api.get('/api/me');
             setUser(res.data.user);
         } catch (error) {
-            console.error('Erreur fetch user');
+            console.error('Erreur fetch user', error);
         }
     };
 
     const fetchFavorites = async () => {
         try {
-            const res = await axios.get('/api/me/favorites');
+            // Backend registers favorites at /api/favorites
+            const res = await api.get('/api/favorites');
             setFavorites(res.data);
         } catch (error) {
-            console.error('Erreur fetch favorites');
+            console.error('Erreur fetch favorites', error);
         }
     };
 
     const toggleFavorite = async (petId: number, isFavorite: boolean) => {
         try {
             if (isFavorite) {
-                await axios.delete(`/api/pets/${petId}/favorites`);
+                await api.delete(`/api/pets/${petId}/favorites`);
             } else {
-                await axios.post(`/api/pets/${petId}/favorites`);
+                await api.post(`/api/pets/${petId}/favorites`);
             }
             fetchFavorites();
         } catch (error) {
-            console.error('Erreur toggle favorite');
+            console.error('Erreur toggle favorite', error);
         }
     };
 
     useEffect(() => {
-        if (localStorage.getItem('token')) {
-            fetchUser();
-            fetchFavorites();
+        try {
+            const token = localStorage.getItem('token');
+            if (token) {
+                setAuthToken(token);
+                fetchUser();
+                fetchFavorites();
+            }
+        } catch (e) {
+            // ignore if localStorage not available
         }
     }, []);
 
