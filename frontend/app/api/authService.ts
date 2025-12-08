@@ -1,4 +1,5 @@
 // app/api/authService.ts
+import { setAuthToken } from '../api/client';
 
 // IMPORTANT: This should point to your Laravel API base URL
 // The /api prefix is already in the path, so don't duplicate it
@@ -43,16 +44,26 @@ export interface LoginData {
 class AuthService {
   // Store token in localStorage
   setToken(token: string): void {
-    localStorage.setItem("auth_token", token);
+    localStorage.setItem("token", token);
+    try {
+      setAuthToken(token);
+    } catch (e) {
+      // If client is unavailable for some reason, ignore — localStorage still holds the token
+    }
   }
 
   getToken(): string | null {
     if (typeof window === "undefined") return null;
-    return localStorage.getItem("auth_token");
+    return localStorage.getItem("token");
   }
 
   removeToken(): void {
-    localStorage.removeItem("auth_token");
+    localStorage.removeItem("token");
+    try {
+      setAuthToken(null);
+    } catch (e) {
+      // ignore
+    }
   }
 
   // Store user data

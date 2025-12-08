@@ -67,7 +67,7 @@ const Profile: React.FC = () => {
                     <p className="text-gray-600">Manage Profile</p>
                 </div>
 
-                <PersonalDetailsForm ref={personalDetailsFormRef} user={user} />
+                {user && <PersonalDetailsForm ref={personalDetailsFormRef} user={user} />}
                 <PasswordChangeForm />
             </div>
         </AuthenticatedLayout>
