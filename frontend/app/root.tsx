@@ -8,6 +8,7 @@ import {
 } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from 'app/contexts/themeContext';
+import { AuthProvider } from "app/contexts/auth";
 
 
 import type { Route } from "./+types/root";
@@ -50,12 +51,14 @@ export default function App() {
     
     <QueryClientProvider client={Client}>
       <ThemeProvider>
+        <AuthProvider>
     <div className="min-h-screen bg-BgLight flex flex-col pt-16 ">
       <NavBar/>
       <div className="mt-15 pt-5 flex-grow container mx-auto px-4">
         <Outlet />
       </div>
     </div>
+    </AuthProvider>
     </ThemeProvider>
     </QueryClientProvider>
     
