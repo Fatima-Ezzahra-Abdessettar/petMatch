@@ -1,8 +1,9 @@
 // app/routes/register.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useAuth } from '~/contexts/auth';
+import { authService } from '~/api/authService';
 import { useTheme } from '~/contexts/themeContext';
 
 export const meta = () => {
@@ -30,6 +31,21 @@ export default function Register() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // New states for verification
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
+  const [countdown, setCountdown] = useState(60);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
+
+  // Countdown effect
+  useEffect(() => {
+    if (showSuccess && countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown, showSuccess]);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
@@ -48,7 +64,9 @@ export default function Register() {
 
     try {
       await register(formData);
-      navigate('/');
+      setRegisteredEmail(formData.email);
+      setShowSuccess(true);
+      setCountdown(60);
     } catch (err: any) {
       setError(err.message || 'Registration failed');
     } finally {
@@ -56,12 +74,131 @@ export default function Register() {
     }
   };
 
+  const handleResendEmail = async () => {
+    setResendLoading(true);
+    setResendMessage("");
+    
+    try {
+      const result = await authService.resendVerificationEmail(registeredEmail);
+      setResendMessage(result.message);
+      setCountdown(120);
+    } catch (err: any) {
+      setResendMessage(err.message || "Failed to resend email");
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  // Success screen after registration
+  if (showSuccess) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8" style={{ backgroundColor: isDarkMode ? '#36332E' : '#F7F5EA' }}>
+        <div
+          className="w-full max-w-md rounded-3xl overflow-hidden shadow-2xl p-8"
+          style={{ backgroundColor: isDarkMode ? "rgb(115,101,91,0.31)" : "#F7F5EA" }}
+        >
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <img
+              src={
+                isDarkMode
+                  ? "public/pet-MattchWhite.PNG"
+                  : "public/pet-MattchBlack.PNG"
+              }
+              alt="PetMatch"
+              className="w-32"
+            />
+          </div>
+
+          {/* Success Icon */}
+          <div className="flex justify-center mb-6">
+            <div
+              className="w-20 h-20 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: isDarkMode ? "#065f46" : "#d1fae5" }}
+            >
+              <span className="text-4xl">✓</span>
+            </div>
+          </div>
+
+          {/* Success Message */}
+          <h1
+            className="text-2xl font-bold text-center mb-4"
+            style={{ color: isDarkMode ? "#F7F5EA" : "#36332E" }}
+          >
+            Registration Succeeded!
+          </h1>
+
+          <p
+            className="text-center mb-6"
+            style={{ color: isDarkMode ? '#d1d5db' : '#6b7280' }}
+          >
+            Please verify your email address. We've sent a verification link to{" "}
+            <span className="font-semibold" style={{ color: "#d97706" }}>
+              {registeredEmail}
+            </span>
+          </p>
+
+          {/* Resend Message */}
+          {resendMessage && (
+            <div
+              className="px-4 py-3 rounded-lg mb-4 text-sm text-center"
+              style={{
+                backgroundColor: resendMessage.includes("failed") || resendMessage.includes("wait")
+                  ? (isDarkMode ? "rgba(239, 68, 68, 0.1)" : "#fef2f2")
+                  : (isDarkMode ? "#065f46" : "#d1fae5"),
+                border: `1px solid ${
+                  resendMessage.includes("failed") || resendMessage.includes("wait")
+                    ? (isDarkMode ? "rgba(239, 68, 68, 0.3)" : "#fecaca")
+                    : (isDarkMode ? "#059669" : "#6ee7b7")
+                }`,
+                color: resendMessage.includes("failed") || resendMessage.includes("wait")
+                  ? (isDarkMode ? "#fca5a5" : "#b91c1c")
+                  : (isDarkMode ? "#d1fae5" : "#065f46"),
+              }}
+            >
+              {resendMessage}
+            </div>
+          )}
+
+          {/* Resend Button */}
+          <button
+            onClick={handleResendEmail}
+            disabled={countdown > 0 || resendLoading}
+            className="w-full font-semibold py-3 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+            style={{
+              backgroundColor: countdown > 0 ? "#9ca3af" : "#d97706",
+              color: "#F7F5EA",
+            }}
+          >
+            {resendLoading
+              ? "Sending..."
+              : countdown > 0
+              ? `Resend email in ${countdown}s`
+              : "Resend verification email"}
+          </button>
+
+          {/* Back to Login */}
+          <div className="text-center text-sm">
+            <Link
+              to="/login"
+              className="font-semibold hover:underline"
+              style={{ color: "#d97706" }}
+            >
+              Back to Login
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Original registration form
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8" style={{ backgroundColor: isDarkMode ? '#36332E' : '#F7F5EA' }}>
       {/* Rounded Container */}
       <div
         className="w-full max-w-4xl sm:max-w-full min-h-[600px] sm:h-[800px] rounded-3xl overflow-hidden shadow-2xl"
-        style={{ backgroundColor: isDarkMode ? "rgb(115,101,91,0.31)" : "#F7F5EA" }}
+        style={{ backgroundColor: isDarkMode ? "rgb(115,101,91,0.31)" : "rgb(255,255,255,0.3)" }}
       >
         <div className="flex flex-col lg:flex-row h-full">
           {/* Left side - Image */}

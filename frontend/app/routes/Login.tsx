@@ -47,7 +47,7 @@ export default function Login() {
       {/* Rounded Container */}
       <div
         className="w-full max-w-4xl sm:max-w-full min-h-[500px] sm:h-[700px] rounded-3xl overflow-hidden shadow-2xl"
-        style={{ backgroundColor: isDarkMode ? "rgb(115,101,91,0.31)" : "#F7F5EA" }}
+        style={{ backgroundColor: isDarkMode ? "rgb(115,101,91,0.31)" : "rgb(255,255,255,0.3)" }}
       >
         <div className="flex flex-col lg:flex-row h-full">
           {/* Left side - Image */}
