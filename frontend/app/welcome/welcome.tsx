@@ -44,9 +44,11 @@ export default function Welcome() {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="w-full sm:w-auto"
           >
-            <button className="w-full sm:w-auto bg-btnPrimary px-4 lg:px-12 xl:px-14 py-2 text-BgLight text-base sm:text-lg rounded-lg hover:bg-[#cb763a] hover:transition-colors active:bg-[#b26228] hover:cursor-pointer transition-all duration-200">
-             GET STARTED !
-            </button>
+            <Link to="/register">
+              <button className="w-full sm:w-auto bg-btnPrimary px-4 lg:px-12 xl:px-14 py-2 text-BgLight text-base sm:text-lg rounded-lg hover:bg-[#cb763a] hover:transition-colors active:bg-[#b26228] hover:cursor-pointer transition-all duration-200">
+               GET STARTED !
+              </button>
+            </Link>
           </motion.div>
           <motion.div
             initial={{ opacity: 0 }}

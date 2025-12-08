@@ -4,5 +4,8 @@ export default [index("routes/home.tsx"),
     route("/our-pets","routes/OurPets.tsx"),
     route("/contact","routes/Contact.tsx"),
     route("/profile","routes/Profile.tsx"),
-    route("/favorites", "routes/Favorites.tsx"),
+    route("/favorites", "routes/Favorites.tsx"),,
+    route("/login","routes/Login.tsx"),      // lowercase
+    route("/register","routes/Register.tsx"),  // lowercase
+    route("/error","routes/Error.tsx")
   ] satisfies RouteConfig;
