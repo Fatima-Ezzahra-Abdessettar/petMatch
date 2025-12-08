@@ -227,32 +227,11 @@ const PetsPage: React.FC = () => {
   // Afficher l'état de chargement
   if (loading) {
     return (
-      <div className="pets-page">
-        <div className="loading-container">
+      <div className="min-h-screen bg-[#E5E5E5] flex items-center justify-center p-5">
+        <div className="text-center text-[#666] max-w-[400px]">
           <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#D29059" />
-          <p>Chargement des animaux...</p>
+          <p className="mt-5 text-lg">Chargement des animaux...</p>
         </div>
-        <style>{`
-          .pets-page {
-            min-height: 100vh;
-            background-color: #E5E5E5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-          }
-          
-          .loading-container {
-            text-align: center;
-            color: #666;
-            max-width: 400px;
-          }
-          
-          .loading-container p {
-            margin-top: 20px;
-            font-size: 1.1rem;
-          }
-        `}</style>
       </div>
     );
   }
@@ -260,81 +239,41 @@ const PetsPage: React.FC = () => {
   // Afficher l'erreur
   if (error) {
     return (
-      <div className="pets-page">
-        <div className="error-container">
+      <div className="min-h-screen bg-[#E5E5E5] flex items-center justify-center p-5">
+        <div className="text-center bg-white p-10 rounded-xl shadow-[0_2px_10px_rgba(0,0,0,0.1)] max-w-[500px]">
           <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#ff6b6b" />
-          <h3>Erreur de chargement</h3>
-          <p>{error}</p>
+          <h3 className="mt-5 mb-2.5 text-[#333]">Erreur de chargement</h3>
+          <p className="text-[#666] mb-5">{error}</p>
           <button 
-            className="retry-btn"
+            className="px-5 py-2.5 bg-[#D29059] border-none rounded-md text-white font-medium cursor-pointer transition-colors hover:bg-[#c57a45]"
             onClick={fetchPets}
           >
             Réessayer
           </button>
         </div>
-        <style>{`
-          .pets-page {
-            min-height: 100vh;
-            background-color: #E5E5E5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-          }
-          
-          .error-container {
-            text-align: center;
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            max-width: 500px;
-          }
-          
-          .error-container h3 {
-            margin: 20px 0 10px;
-            color: #333;
-          }
-          
-          .error-container p {
-            color: #666;
-            margin-bottom: 20px;
-          }
-          
-          .retry-btn {
-            padding: 10px 20px;
-            background: #D29059;
-            border: none;
-            border-radius: 6px;
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.2s;
-          }
-          
-          .retry-btn:hover {
-            background: #c57a45;
-          }
-        `}</style>
       </div>
     );
   }
 
   return (
-    <div className="pets-page">
-      <main className="page-content">
-        <div className="content-card">
+    <div className="min-h-screen bg-[#E5E5E5] p-5">
+      <main className="p-0">
+        <div className="bg-white rounded-xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.05)]">
           {/* En-tête */}
-          <div className="list-header">
-            <h2 className="list-title">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-xl font-semibold text-[#333] m-0">
               Pets list
-              <span className="total-count"> ({filteredPets.length})</span>
+              <span className="text-base text-[#666] font-normal ml-2.5"> ({filteredPets.length})</span>
             </h2>
             
             {/* Filtres */}
-            <div className="filters-container">
+            <div className="relative">
               <button 
-                className={`filter-btn ${isFilterOpen ? 'active' : ''}`}
+                className={`flex items-center gap-2 bg-white border rounded-lg px-5 py-2.5 cursor-pointer text-sm text-[#666] transition-all relative ${
+                  isFilterOpen 
+                    ? 'bg-[#f8f8f8] border-[#D29059] text-[#D29059]' 
+                    : 'border-[#ddd] hover:bg-[#f8f8f8] hover:border-[#D29059] hover:text-[#D29059]'
+                }`}
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 aria-expanded={isFilterOpen}
                 aria-label="Filter options"
@@ -344,7 +283,7 @@ const PetsPage: React.FC = () => {
                 </svg>
                 <span>Filters</span>
                 {(selectedFilters.species.length > 0 || selectedFilters.ageRange.length > 0) && (
-                  <span className="filter-count">
+                  <span className="absolute -top-2 -right-2 bg-[#D29059] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
                     {selectedFilters.species.length + selectedFilters.ageRange.length}
                   </span>
                 )}
@@ -353,39 +292,43 @@ const PetsPage: React.FC = () => {
               {isFilterOpen && (
                 <>
                   <div 
-                    className="filters-overlay" 
+                    className="fixed inset-0 z-[999] bg-transparent" 
                     onClick={() => setIsFilterOpen(false)} 
                     role="presentation"
                   />
-                  <div className="filters-dropdown" role="dialog" aria-label="Filter options">
+                  <div className="absolute top-[calc(100%+8px)] right-0 w-60 bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] z-[1000] overflow-hidden" role="dialog" aria-label="Filter options">
                     {/* Section Species */}
-                    <div className="filter-section">
+                    <div className="border-b border-[#f0f0f0]">
                       <button 
-                        className="filter-section-header"
+                        className="w-full flex items-center justify-between gap-2.5 px-4 py-3.5 bg-[#f8f8f8] border-none cursor-pointer text-sm text-[#333] font-medium transition-colors hover:bg-[#f0f0f0]"
                         onClick={() => toggleSection('species')}
                         aria-expanded={isSpeciesOpen}
                       >
-                        <span>Species</span>
+                        <span className="text-left">Species</span>
                         <FontAwesomeIcon 
                           icon={faChevronDown} 
-                          className={`chevron-icon ${isSpeciesOpen ? 'rotated' : ''}`}
+                          className={`w-3 h-3 text-[#666] transition-transform ${isSpeciesOpen ? 'rotate-180' : ''}`}
                         />
                       </button>
                       
                       {isSpeciesOpen && (
-                        <div className="filter-options">
+                        <div className="bg-white py-1">
                           {speciesOptions.map(option => {
                             const isSelected = selectedFilters.species.includes(option.value);
                             return (
                               <button
                                 key={option.value}
-                                className={`filter-option ${isSelected ? 'selected' : ''}`}
+                                className={`w-full px-4 py-3 border-none bg-white text-left cursor-pointer text-sm transition-all flex items-center justify-between ${
+                                  isSelected 
+                                    ? 'bg-[#FEF3DD] text-[#D29059] font-medium' 
+                                    : 'text-[#555] hover:bg-[#f8f8f8] hover:text-[#D29059]'
+                                }`}
                                 onClick={() => toggleFilter('species', option.value)}
                                 aria-pressed={isSelected}
                               >
-                                <span className="filter-option-label">{option.label}</span>
+                                <span className="flex-1">{option.label}</span>
                                 {isSelected && (
-                                  <span className="checkmark">✓</span>
+                                  <span className="text-[#D29059] font-bold text-sm">✓</span>
                                 )}
                               </button>
                             );
@@ -395,33 +338,37 @@ const PetsPage: React.FC = () => {
                     </div>
 
                     {/* Section Age */}
-                    <div className="filter-section">
+                    <div className="border-b border-[#f0f0f0]">
                       <button 
-                        className="filter-section-header"
+                        className="w-full flex items-center justify-between gap-2.5 px-4 py-3.5 bg-[#f8f8f8] border-none cursor-pointer text-sm text-[#333] font-medium transition-colors hover:bg-[#f0f0f0]"
                         onClick={() => toggleSection('age')}
                         aria-expanded={isAgeOpen}
                       >
-                        <span>Age</span>
+                        <span className="text-left">Age</span>
                         <FontAwesomeIcon 
                           icon={faChevronDown} 
-                          className={`chevron-icon ${isAgeOpen ? 'rotated' : ''}`}
+                          className={`w-3 h-3 text-[#666] transition-transform ${isAgeOpen ? 'rotate-180' : ''}`}
                         />
                       </button>
                       
                       {isAgeOpen && (
-                        <div className="filter-options">
+                        <div className="bg-white py-1">
                           {ageOptions.map(option => {
                             const isSelected = selectedFilters.ageRange.includes(option.value);
                             return (
                               <button
                                 key={option.value}
-                                className={`filter-option ${isSelected ? 'selected' : ''}`}
+                                className={`w-full px-4 py-3 border-none bg-white text-left cursor-pointer text-sm transition-all flex items-center justify-between ${
+                                  isSelected 
+                                    ? 'bg-[#FEF3DD] text-[#D29059] font-medium' 
+                                    : 'text-[#555] hover:bg-[#f8f8f8] hover:text-[#D29059]'
+                                }`}
                                 onClick={() => toggleFilter('ageRange', option.value)}
                                 aria-pressed={isSelected}
                               >
-                                <span className="filter-option-label">{option.label}</span>
+                                <span className="flex-1">{option.label}</span>
                                 {isSelected && (
-                                  <span className="checkmark">✓</span>
+                                  <span className="text-[#D29059] font-bold text-sm">✓</span>
                                 )}
                               </button>
                             );
@@ -431,9 +378,9 @@ const PetsPage: React.FC = () => {
                     </div>
 
                     {/* Boutons d'action */}
-                    <div className="filter-actions">
+                    <div className="flex gap-2.5 px-5 py-4 bg-[#f8f8f8] border-t border-[#f0f0f0]">
                       <button 
-                        className="filter-clear-btn"
+                        className="flex-1 px-2.5 py-2.5 bg-white border border-[#ddd] rounded-md cursor-pointer text-sm text-[#666] transition-all hover:bg-[#f8f8f8] hover:border-[#999]"
                         onClick={() => {
                           setSelectedFilters({ species: [], ageRange: [] });
                         }}
@@ -441,7 +388,7 @@ const PetsPage: React.FC = () => {
                         Clear all
                       </button>
                       <button 
-                        className="filter-apply-btn"
+                        className="flex-1 px-2.5 py-2.5 bg-[#D29059] border-none rounded-md cursor-pointer text-sm text-white font-medium transition-colors hover:bg-[#c57a45]"
                         onClick={() => setIsFilterOpen(false)}
                       >
                         Apply
@@ -456,8 +403,8 @@ const PetsPage: React.FC = () => {
           {/* Grille d'animaux - avec espacement égal */}
           {filteredPets.length > 0 ? (
             <>
-              <div className="pets-grid-container">
-                <div className="pets-grid">
+              <div className="w-full mb-8">
+                <div className="grid grid-cols-4 gap-5 w-full">
                   {currentPets.map((pet) => (
                     <PetCard 
                       key={pet.id} 
@@ -469,15 +416,15 @@ const PetsPage: React.FC = () => {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="pagination">
-                  <div className="pagination-info">
+                <div className="flex justify-between items-center pt-5 border-t border-[#eee]">
+                  <div className="text-[#666] text-sm">
                     {startIndex + 1} - {Math.min(startIndex + itemsPerPage, filteredPets.length)} of {filteredPets.length}
                   </div>
                   
-                  <div className="pagination-controls">
-                    <span className="page-label">Page</span>
+                  <div className="flex items-center gap-4">
+                    <span className="text-[#666] text-sm">Page</span>
                     <select 
-                      className="page-select"
+                      className="px-3 py-2 border border-[#ddd] rounded-md bg-white cursor-pointer text-sm min-w-[60px] focus:outline-none focus:border-[#D29059]"
                       value={currentPage}
                       onChange={(e) => handlePageChange(Number(e.target.value))}
                       aria-label="Select page"
@@ -489,9 +436,9 @@ const PetsPage: React.FC = () => {
                       ))}
                     </select>
                     
-                    <div className="nav-buttons">
+                    <div className="flex gap-2">
                       <button 
-                        className="nav-btn"
+                        className="bg-white border border-[#ddd] rounded-md w-9 h-9 flex items-center justify-center cursor-pointer transition-all text-[#666] hover:bg-[#D29059] hover:border-[#D29059] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
                         aria-label="Previous page"
@@ -500,7 +447,7 @@ const PetsPage: React.FC = () => {
                       </button>
                       
                       <button 
-                        className="nav-btn"
+                        className="bg-white border border-[#ddd] rounded-md w-9 h-9 flex items-center justify-center cursor-pointer transition-all text-[#666] hover:bg-[#D29059] hover:border-[#D29059] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
                         aria-label="Next page"
@@ -513,13 +460,13 @@ const PetsPage: React.FC = () => {
               )}
             </>
           ) : (
-            <div className="no-results">
-              <p>No pets found matching your filters.</p>
+            <div className="text-center py-15 px-5 text-[#666]">
+              <p className="mb-5 text-lg">No pets found matching your filters.</p>
               {pets.length === 0 ? (
-                <div className="empty-state">
-                  <p>No pets available at the moment.</p>
+                <div className="mt-5">
+                  <p className="mb-4 text-[#999] italic">No pets available at the moment.</p>
                   <button 
-                    className="refresh-btn"
+                    className="px-5 py-2.5 bg-[#D29059] border-none rounded-md text-white font-medium cursor-pointer transition-colors hover:bg-[#c57a45] inline-flex items-center gap-2"
                     onClick={fetchPets}
                   >
                     <FontAwesomeIcon icon={faSpinner} spin={loading} /> Refresh
@@ -527,7 +474,7 @@ const PetsPage: React.FC = () => {
                 </div>
               ) : (
                 <button 
-                  className="clear-filters-btn"
+                  className="px-5 py-2.5 bg-[#D29059] border-none rounded-md text-white font-medium cursor-pointer transition-colors hover:bg-[#c57a45]"
                   onClick={() => setSelectedFilters({ species: [], ageRange: [] })}
                 >
                   Clear all filters
@@ -537,421 +484,6 @@ const PetsPage: React.FC = () => {
           )}
         </div>
       </main>
-
-      {/* Styles */}
-      <style>{`
-        .pets-page {
-          min-height: 100vh;
-          background-color: #E5E5E5;
-          padding: 20px;
-        }
-        
-        .page-content {
-          padding: 0;
-        }
-
-        .content-card {
-          background: white;
-          border-radius: 12px;
-          padding: 15px;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .list-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 30px;
-        }
-
-        .list-title {
-          font-size: 1.5rem;
-          font-weight: 600;
-          color: #333;
-          margin: 0;
-        }
-
-        .total-count {
-          font-size: 1rem;
-          color: #666;
-          font-weight: normal;
-          margin-left: 10px;
-        }
-
-        .filters-container {
-          position: relative;
-        }
-
-        .filter-btn {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: white;
-          border: 1px solid #ddd;
-          border-radius: 8px;
-          padding: 10px 20px;
-          cursor: pointer;
-          font-size: 0.95rem;
-          color: #666;
-          transition: all 0.2s;
-          position: relative;
-        }
-
-        .filter-btn:hover,
-        .filter-btn.active {
-          background-color: #f8f8f8;
-          border-color: #D29059;
-          color: #D29059;
-        }
-
-        .filter-btn svg {
-          width: 16px;
-          height: 16px;
-        }
-
-        .filter-count {
-          position: absolute;
-          top: -8px;
-          right: -8px;
-          background: #D29059;
-          color: white;
-          font-size: 0.75rem;
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .filters-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 999;
-          background: transparent;
-        }
-
-        .filters-dropdown {
-          position: absolute;
-          top: calc(100% + 8px);
-          right: 0;
-          width: 240px;
-          background: white;
-          border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-          z-index: 1000;
-          overflow: hidden;
-        }
-
-        .filter-section {
-          border-bottom: 1px solid #f0f0f0;
-        }
-
-        .filter-section:last-child {
-          border-bottom: none;
-        }
-
-        .filter-section-header {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          padding: 14px 16px;
-          background: #f8f8f8;
-          border: none;
-          cursor: pointer;
-          font-size: 0.95rem;
-          color: #333;
-          font-weight: 500;
-          transition: background-color 0.2s;
-        }
-
-        .filter-section-header:hover {
-          background: #f0f0f0;
-        }
-
-        .filter-section-header span {
-          text-align: left;
-        }
-
-        .chevron-icon {
-          width: 12px;
-          height: 12px;
-          color: #666;
-          transition: transform 0.2s;
-        }
-
-        .chevron-icon.rotated {
-          transform: rotate(180deg);
-        }
-
-        .filter-options {
-          background: white;
-          padding: 4px 0;
-        }
-
-        .filter-option {
-          width: 100%;
-          padding: 12px 16px;
-          border: none;
-          background: white;
-          text-align: left;
-          cursor: pointer;
-          font-size: 0.9rem;
-          color: #555;
-          transition: all 0.2s;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .filter-option:hover {
-          background: #f8f8f8;
-          color: #D29059;
-        }
-
-        .filter-option.selected {
-          background: #FEF3DD;
-          color: #D29059;
-          font-weight: 500;
-        }
-
-        .filter-option-label {
-          flex: 1;
-        }
-
-        .checkmark {
-          color: #D29059;
-          font-weight: bold;
-          font-size: 0.9rem;
-        }
-
-        .filter-actions {
-          display: flex;
-          gap: 10px;
-          padding: 16px 20px;
-          background: #f8f8f8;
-          border-top: 1px solid #f0f0f0;
-        }
-
-        .filter-clear-btn {
-          flex: 1;
-          padding: 10px;
-          background: white;
-          border: 1px solid #ddd;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 0.9rem;
-          color: #666;
-          transition: all 0.2s;
-        }
-
-        .filter-clear-btn:hover {
-          background: #f8f8f8;
-          border-color: #999;
-        }
-
-        .filter-apply-btn {
-          flex: 1;
-          padding: 10px;
-          background: #D29059;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 0.9rem;
-          color: white;
-          font-weight: 500;
-          transition: background-color 0.2s;
-        }
-
-        .filter-apply-btn:hover {
-          background: #c57a45;
-        }
-
-        /* Conteneur pour un espacement égal */
-        .pets-grid-container {
-          width: 100%;
-          margin-bottom: 30px;
-        }
-
-        /* Grille avec espacement égal de tous les côtés */
-        .pets-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 20px;
-          width: 100%;
-        }
-
-        /* Pour garantir que chaque carte prend exactement la même largeur */
-        .pets-grid > * {
-          min-width: 0; /* Important pour éviter le débordement */
-        }
-
-        /* Pour les écrans moyens : 3 cartes par ligne */
-        @media (max-width: 1200px) {
-          .pets-grid {
-            grid-template-columns: repeat(3, 1fr);
-          }
-        }
-
-        /* Pour les tablettes : 2 cartes par ligne */
-        @media (max-width: 900px) {
-          .pets-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-
-        /* Pour les mobiles : 1 carte par ligne */
-        @media (max-width: 600px) {
-          .pets-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        .pagination {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-top: 20px;
-          border-top: 1px solid #eee;
-        }
-
-        .pagination-info {
-          color: #666;
-          font-size: 0.9rem;
-        }
-
-        .pagination-controls {
-          display: flex;
-          align-items: center;
-          gap: 15px;
-        }
-
-        .page-label {
-          color: #666;
-          font-size: 0.9rem;
-        }
-
-        .page-select {
-          padding: 8px 12px;
-          border: 1px solid #ddd;
-          border-radius: 6px;
-          background: white;
-          cursor: pointer;
-          font-size: 0.9rem;
-          min-width: 60px;
-        }
-
-        .page-select:focus {
-          outline: none;
-          border-color: #D29059;
-        }
-
-        .nav-buttons {
-          display: flex;
-          gap: 8px;
-        }
-
-        .nav-btn {
-          background: white;
-          border: 1px solid #ddd;
-          border-radius: 6px;
-          width: 35px;
-          height: 35px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s;
-          color: #666;
-        }
-
-        .nav-btn:hover:not(:disabled) {
-          background-color: #D29059;
-          border-color: #D29059;
-          color: white;
-        }
-
-        .nav-btn:disabled {
-          opacity: 0.3;
-          cursor: not-allowed;
-        }
-
-        .no-results {
-          text-align: center;
-          padding: 60px 20px;
-          color: #666;
-        }
-
-        .no-results p {
-          margin-bottom: 20px;
-          font-size: 1.1rem;
-        }
-
-        .empty-state {
-          margin-top: 20px;
-        }
-
-        .empty-state p {
-          margin-bottom: 15px;
-          color: #999;
-          font-style: italic;
-        }
-
-        .refresh-btn, .clear-filters-btn {
-          padding: 10px 20px;
-          background: #D29059;
-          border: none;
-          border-radius: 6px;
-          color: white;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background-color 0.2s;
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .refresh-btn:hover, .clear-filters-btn:hover {
-          background: #c57a45;
-        }
-
-        /* Responsive pour le sidebar */
-        @media (max-width: 768px) {
-          .pets-page {
-            margin-left: 70px;
-            padding: 10px;
-          }
-
-          .content-card {
-            padding: 20px;
-          }
-
-          .pagination {
-            flex-direction: column;
-            gap: 15px;
-            align-items: flex-start;
-          }
-
-          .pagination-controls {
-            width: 100%;
-            justify-content: space-between;
-          }
-
-          .filters-dropdown {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 300px;
-          }
-        }
-      `}</style>
     </div>
   );
 };
