@@ -401,7 +401,6 @@ export default function Welcome() {
           </div>
         </div>
       </section>
-
       {/* Our Pets Section */}
       <section className="py-16 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-20">
@@ -420,6 +419,7 @@ export default function Welcome() {
                   transform: `translateX(-${currentPetIndex * (100 / visibleCount)}%)`,
                 }}
               >
+                {/* Regular Pet Cards */}
                 {pets.map((pet) => (
                   <div
                     key={pet.id}
@@ -429,19 +429,73 @@ export default function Welcome() {
                     <PetCard props={pet} />
                   </div>
                 ))}
+
+                {/* Discover More Pets Card */}
+                <div
+                  className="flex-shrink-0 px-"
+                  style={{ width: `${100 / visibleCount}%` }}
+                >
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    viewport={{ once: true }}
+                    className="relative rounded-2xl overflow-hidden w-full h-full min-h-[400px] group cursor-pointer"
+                    style={{
+                      boxShadow: isDarkMode
+                        ? "0 25px 50px -12px rgba(0, 0, 0, 0.6)"
+                        : "0 25px 50px -12px rgba(163, 163, 163, 0.4)",
+                    }}
+                  >
+                    <div
+                      className="absolute inset-0 bg-cover bg-center"
+                      style={{
+                        backgroundImage: `url('https://images.unsplash.com/photo-1563460716037-460a3ad24ba9?w=600&h=800&fit=crop')`,
+                        filter: "blur(3px)",
+                        transform: "scale(1.1)",
+                      }}
+                    />
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+                      <div className="text-6xl mb-6 animate-bounce">🔒</div>
+
+                      <h2 className="font-playfair text-3xl text-white mb-4">
+                        More Pets Waiting
+                      </h2>
+
+                      <p className="text-white/90 text-lg mb-8 max-w-xs">
+                        Discover hundreds of adorable companions ready to find
+                        their forever homes
+                      </p>
+
+                      <Link to="/our-pets">
+                        <button
+                          className="px-10 py-4 bg-[#D97F3E] hover:bg-[#c17135] text-white rounded-full 
+                    text-lg font-medium transition-all duration-300 shadow-xl hover:shadow-2xl
+                    transform hover:scale-105 active:scale-95"
+                        >
+                          Browse All Pets
+                        </button>
+                      </Link>
+                    </div>
+                  </motion.div>
+                </div>
               </div>
             </div>
 
+            {/* Navigation Buttons */}
             <button
               onClick={() =>
                 setCurrentPetIndex(Math.max(0, currentPetIndex - 1))
               }
               disabled={currentPetIndex === 0}
               className={`absolute -left-6 lg:-left-20 top-1/2 -translate-y-1/2 w-12 h-12 lg:w-16 lg:h-16 rounded-full 
-                ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-white hover:bg-gray-100"} 
-                shadow-xl flex items-center justify-center transition-all duration-300
-                disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 active:scale-95
-                hidden md:flex`}
+          ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-white hover:bg-gray-100"} 
+          shadow-xl flex items-center justify-center transition-all duration-300
+          disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 active:scale-95
+          hidden md:flex`}
             >
               <svg
                 className="w-6 h-6 lg:w-8 lg:h-8"
@@ -461,15 +515,15 @@ export default function Welcome() {
             <button
               onClick={() =>
                 setCurrentPetIndex(
-                  Math.min(pets.length - visibleCount, currentPetIndex + 1)
+                  Math.min(pets.length + 1 - visibleCount, currentPetIndex + 1)
                 )
               }
-              disabled={currentPetIndex >= pets.length - visibleCount}
+              disabled={currentPetIndex >= pets.length + 1 - visibleCount}
               className={`absolute -right-6 lg:-right-20 top-1/2 -translate-y-1/2 w-12 h-12 lg:w-16 lg:h-16 rounded-full 
-                ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-white hover:bg-gray-100"} 
-                shadow-xl flex items-center justify-center transition-all duration-300
-                disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 active:scale-95
-                hidden md:flex`}
+          ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-white hover:bg-gray-100"} 
+          shadow-xl flex items-center justify-center transition-all duration-300
+          disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 active:scale-95
+          hidden md:flex`}
             >
               <svg
                 className="w-6 h-6 lg:w-8 lg:h-8"
@@ -486,8 +540,9 @@ export default function Welcome() {
               </svg>
             </button>
 
+            {/* Pagination Dots */}
             <div className="flex justify-center mt-8 space-x-2">
-              {[...Array(Math.max(0, pets.length - visibleCount + 1))].map(
+              {[...Array(Math.max(0, pets.length + 1 - visibleCount + 1))].map(
                 (_, index) => (
                   <button
                     key={index}
@@ -503,234 +558,6 @@ export default function Welcome() {
                 )
               )}
             </div>
-          </div>
-
-          <div className="flex justify-center mt-12">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-              className="relative rounded-2xl overflow-hidden w-full max-w-md h-[450px] group cursor-pointer"
-              style={{
-                boxShadow: isDarkMode
-                  ? "0 25px 50px -12px rgba(0, 0, 0, 0.6)"
-                  : "0 25px 50px -12px rgba(163, 163, 163, 0.4)",
-              }}
-            >
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{
-                  backgroundImage: `url('/locked-pet.jpg')`,
-                  filter: "blur(3px)",
-                  transform: "scale(1.1)",
-                }}
-              />
-
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                <div className="text-6xl mb-6 animate-bounce">🔒</div>
-
-                <h2 className="font-playfair text-3xl text-white mb-4">
-                  More Pets Waiting
-                </h2>
-
-                <p className="text-white/90 text-lg mb-8 max-w-xs">
-                  Discover hundreds of adorable companions ready to find their
-                  forever homes
-                </p>
-
-                <Link to="/our-pets">
-                  <button
-                    className="px-10 py-4 bg-[#D97F3E] hover:bg-[#c17135] text-white rounded-full 
-                    text-lg font-medium transition-all duration-300 shadow-xl hover:shadow-2xl
-                    transform hover:scale-105 active:scale-95"
-                  >
-                    Browse All Pets
-                  </button>
-                </Link>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Reviews Section */}
-      <section className="py-16 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-20">
-          <h2
-            className="text-4xl md:text-5xl lg:text-6xl font-playfair text-center mb-12 lg:mb-16"
-            style={{ color: isDarkMode ? "#F5F3ED" : "#36332E" }}
-          >
-            Reviews
-          </h2>
-
-          <div className="relative max-w-6xl mx-auto">
-            {visibleCount === 1 ? (
-              <div className="flex overflow-x-auto gap-6 pb-4">
-                {reviews.map((review, index) => (
-                  <div key={index} className="flex-shrink-0 w-80">
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      viewport={{ once: true }}
-                      className={`${isDarkMode ? "#73655B" : "bg-white"}
-                        rounded-3xl p-6 lg:p-8 shadow-xl hover:shadow-2xl transition-all duration-300
-                        transform hover:-translate-y-2`}
-                    >
-                      <div className="flex items-center gap-4 mb-6">
-                        <img
-                          src={review.image}
-                          alt={review.name}
-                          className="w-16 h-16 lg:w-20 lg:h-20 rounded-full object-cover ring-4 ring-[#D97F3E]/20"
-                        />
-                        <div>
-                          <h4 className="font-semibold text-lg lg:text-xl">
-                            {review.name}
-                          </h4>
-                          <p
-                            className={`text-sm lg:text-base ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
-                          >
-                            {review.country}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-1 mb-4">
-                        {[...Array(5)].map((_, i) => (
-                          <span key={i} className="text-2xl">
-                            ⭐
-                          </span>
-                        ))}
-                      </div>
-
-                      <p className="font-semibold text-lg mb-3">
-                        "{review.title}"
-                      </p>
-                      <p
-                        className={`text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
-                      >
-                        {review.text}
-                      </p>
-                    </motion.div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {reviews
-                  .slice(currentReviewIndex, currentReviewIndex + visibleCount)
-                  .map((review, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      viewport={{ once: true }}
-                      className={`${isDarkMode ? "bg-[#73655B]" : "bg-white"}
-                      rounded-3xl p-6 lg:p-8 shadow-xl hover:shadow-2xl transition-all duration-300
-                      transform hover:-translate-y-2`}
-                    >
-                      <div className="flex items-center gap-4 mb-6">
-                        <img
-                          src={review.image}
-                          alt={review.name}
-                          className="w-16 h-16 lg:w-20 lg:h-20 rounded-full object-cover ring-4 ring-[#D97F3E]/20"
-                        />
-                        <div>
-                          <h4 className="font-semibold text-lg lg:text-xl">
-                            {review.name}
-                          </h4>
-                          <p
-                            className={`text-sm lg:text-base ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}
-                          >
-                            {review.country}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-1 mb-4">
-                        {[...Array(5)].map((_, i) => (
-                          <span key={i} className="text-2xl">
-                            ⭐
-                          </span>
-                        ))}
-                      </div>
-
-                      <p className="font-semibold text-lg mb-3">
-                        "{review.title}"
-                      </p>
-                      <p
-                        className={`text-base leading-relaxed ${isDarkMode ? "text-gray-300" : "text-gray-600"}`}
-                      >
-                        {review.text}
-                      </p>
-                    </motion.div>
-                  ))}
-              </div>
-            )}
-
-            {visibleCount > 1 && (
-              <>
-                <button
-                  onClick={() =>
-                    setCurrentReviewIndex(
-                      currentReviewIndex === 0
-                        ? reviews.length - visibleCount
-                        : currentReviewIndex - visibleCount
-                    )
-                  }
-                  className={`absolute -left-6 lg:-left-16 top-1/2 -translate-y-1/2 w-12 h-12 lg:w-16 lg:h-16 rounded-full
-                    ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-white hover:bg-gray-100"}
-                    shadow-xl flex items-center justify-center transition-all duration-300
-                    hover:scale-110 active:scale-95 flex`}
-                >
-                  <svg
-                    className="w-6 h-6 lg:w-8 lg:h-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2.5}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                </button>
-
-                <button
-                  onClick={() =>
-                    setCurrentReviewIndex(
-                      currentReviewIndex >= reviews.length - visibleCount
-                        ? 0
-                        : currentReviewIndex + visibleCount
-                    )
-                  }
-                  className={`absolute -right-6 lg:-right-16 top-1/2 -translate-y-1/2 w-12 h-12 lg:w-16 lg:h-16 rounded-full
-                    ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-white hover:bg-gray-100"}
-                    shadow-xl flex items-center justify-center transition-all duration-300
-                    hover:scale-110 active:scale-95 flex`}
-                >
-                  <svg
-                    className="w-6 h-6 lg:w-8 lg:h-8"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2.5}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
-              </>
-            )}
           </div>
         </div>
       </section>
