@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import api from '~/api/client';
+import { useNavigate } from 'react-router';
+import { useTheme } from '~/contexts/themeContext';
 
 // Inline SVG Icons
 const CheckCircle2 = () => (
@@ -52,6 +55,8 @@ interface FormData {
 }
 
 const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
+  const { isDarkMode } = useTheme(); // ← Add this
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -147,69 +152,60 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
     setCurrentStep(prev => Math.max(prev - 1, 1));
   };
 
-  const handleSubmit = async () => {
-    if (!validateStep(3)) return;
+const handleSubmit = async () => {
+  if (!validateStep(3)) return;
 
-    setIsSubmitting(true);
-    setError(null);
+  setIsSubmitting(true);
+  setError(null);
 
-    try {
-      const token = localStorage.getItem('auth_token');
-      const apiUrl = 'http://localhost:8000';
-      
-      // Map form data to backend structure
-      const submissionData = {
-        form_data: {
-          perspectiveParent: formData.perspectiveParent,
-          phoneNumber: formData.phoneNumber,
-          age: formData.age,
-          partnerName: formData.partnerName || null,
-          partnerPhoneNumber: formData.partnerPhoneNumber || null,
-          partnerAge: formData.partnerAge || null,
-          children: formData.hasChildren,
-          childrenDetails: formData.childrenCount || null,
-          address: formData.address,
-          otherPets: formData.otherPets,
-          housingType: formData.housingType,
-          ownOrRent: formData.ownOrRent,
-          hasYard: formData.hasYard,
-          adoptionMotivation: formData.adoptionMotivation,
-          concerns: formData.concerns,
-          otherConcernDetails: formData.otherConcernDetails || null,
-          agreeTerms: formData.agreedToTerms
-        }
-      };
-
-      console.log('📤 Submitting adoption application:', submissionData);
-      
-      const response = await fetch(`${apiUrl}/api/pets/${petId}/apply`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(submissionData)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to submit application');
+  try {
+    const submissionData = {
+      form_data: {
+        perspectiveParent: formData.perspectiveParent,
+        phoneNumber: formData.phoneNumber,
+        age: formData.age,
+        partnerName: formData.partnerName || null,
+        partnerPhoneNumber: formData.partnerPhoneNumber || null,
+        partnerAge: formData.partnerAge || null,
+        children: formData.hasChildren,
+        childrenDetails: formData.childrenCount || null,
+        address: formData.address,
+        otherPets: formData.otherPets,
+        housingType: formData.housingType,
+        ownOrRent: formData.ownOrRent,
+        hasYard: formData.hasYard,
+        adoptionMotivation: formData.adoptionMotivation,
+        concerns: formData.concerns,
+        otherConcernDetails: formData.otherConcernDetails || null,
+        agreeTerms: formData.agreedToTerms
       }
+    };
 
-      const result = await response.json();
-      console.log('✅ Application submitted successfully:', result);
-      
-      setSuccess(true);
-      setCurrentStep(4);
-      if (onSuccess) onSuccess();
-    } catch (err) {
-      console.error('❌ Submission error:', err);
-      setError((err as Error).message || 'Failed to submit application. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+    console.log('📤 Submitting adoption application:', submissionData);
+    
+    // Use api client - it automatically adds the auth token!
+    const response = await api.post(`/api/pets/${petId}/apply`, submissionData);
+    
+    console.log('✅ Application submitted successfully:', response.data);
+    
+    setSuccess(true);
+    setCurrentStep(4);
+    if (onSuccess) onSuccess();
+  } catch (err: any) {
+    console.error('❌ Submission error:', err);
+    
+    // Better error messages
+    if (err.response?.status === 401) {
+      setError('You must be logged in to submit an adoption application.');
+    } else {
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to submit application. Please try again.';
+      setError(errorMessage);
     }
-  };
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+   
 
   const tabs = [
     { id: 1, label: 'Personal information', active: currentStep === 1 },
@@ -218,7 +214,10 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+    <div 
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{ backgroundColor: isDarkMode ? '#2d2d2d' : '#1a1a1a' }}
+    >
       {/* Terms Modal */}
       {showTermsModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -226,6 +225,7 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
             <button
               onClick={() => setShowTermsModal(false)}
               className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
+              aria-label="Close"
             >
               <XIcon className="w-6 h-6 text-gray-600" />
             </button>
@@ -242,7 +242,7 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
               </h1>
             </div>
 
-            <div className="prose max-w-none text-sm text-gray-700 space-y-4">
+            <div className="text-sm text-gray-700 space-y-4">
               <p className="text-center font-medium text-base">
                 Thank you for choosing to adopt a pet from petMatch. Every animal and every home is unique. We are here to help you find the right pet. We use this application as a starting point to match your lifestyle, needs, and experience with the animals we so well. We are committed to finding each animal the right match.
               </p>
@@ -364,8 +364,12 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
                   placeholder="+225 7777777777"
                   value={formData.phoneNumber}
                   onChange={(e) => updateField('phoneNumber', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                />
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                              isDarkMode 
+                                ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder:text-gray-400' 
+                                : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-500'
+                            }`}                
+                  />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -376,7 +380,11 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
                   placeholder="28"
                   value={formData.age}
                   onChange={(e) => updateField('age', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                              isDarkMode 
+                                ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder:text-gray-400' 
+                                : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-500'
+                            }`}               
                 />
               </div>
             </div>
@@ -394,7 +402,11 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
                       placeholder="Ahmed Bennani"
                       value={formData.partnerName}
                       onChange={(e) => updateField('partnerName', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                                  isDarkMode 
+                                    ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder:text-gray-400' 
+                                    : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-500'
+                                }`}                    
                     />
                   </div>
                   <div>
@@ -404,7 +416,11 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
                       placeholder="+225 7777777777"
                       value={formData.partnerPhoneNumber}
                       onChange={(e) => updateField('partnerPhoneNumber', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                                  isDarkMode 
+                                    ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder:text-gray-400' 
+                                    : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-500'
+                                }`}                    
                     />
                   </div>
                   <div>
@@ -414,7 +430,11 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
                       placeholder="28"
                       value={formData.partnerAge}
                       onChange={(e) => updateField('partnerAge', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                                  isDarkMode 
+                                    ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder:text-gray-400' 
+                                    : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-500'
+                                }`}                   
                     />
                   </div>
                 </div>
@@ -469,8 +489,12 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
                 placeholder="Tanger Boukhalef"
                 value={formData.address}
                 onChange={(e) => updateField('address', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              />
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                            isDarkMode 
+                              ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder:text-gray-400' 
+                              : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-500'
+                          }`}   
+               />
             </div>
           </div>
         )}
@@ -513,7 +537,11 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
               <select
                 value={formData.housingType}
                 onChange={(e) => updateField('housingType', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors ${
+                            isDarkMode 
+                              ? 'bg-gray-800 border-gray-600 text-gray-100 placeholder:text-gray-400' 
+                              : 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-500'
+                          }`}              
               >
                 <option value="">Select housing type</option>
                 <option value="HOUSE">House</option>
@@ -652,39 +680,8 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
                   </button>{' '}
                   <span className="text-red-600">*</span>
                 </span>
-
-                              </label>
+              </label>
             </div>
-          </div>
-        )}
-
-        {/* Navigation Buttons */}
-        {currentStep < 4 && (
-          <div className="flex justify-between mt-10">
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-              className="px-6 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50"
-            >
-              Previous
-            </button>
-
-            {currentStep < 3 ? (
-              <button
-                onClick={handleNext}
-                className="px-6 py-2 rounded-lg text-sm font-medium bg-purple-700 text-white hover:bg-purple-800"
-              >
-                Next
-              </button>
-            ) : (
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="px-6 py-2 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Application'}
-              </button>
-            )}
           </div>
         )}
 
@@ -692,19 +689,45 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
         {currentStep === 4 && success && (
           <div className="text-center py-12">
             <CheckCircle2 />
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
-              Application Submitted!
-            </h2>
-            <p className="text-gray-600 mb-6">
-              Thank you for applying to adopt this pet. Our team will review your request and contact you soon.
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Application Submitted!</h3>
+            <p className="text-gray-600 mb-8">
+              Thank you for your application. We'll review it and get back to you soon.
             </p>
-
             <button
-              onClick={() => onSuccess && onSuccess()}
-              className="px-6 py-2 rounded-lg bg-purple-700 text-white hover:bg-purple-800"
+              onClick={() => navigate('/our-pets')}
+              className="px-6 py-3 bg-purple-700 text-white rounded-lg hover:bg-purple-800 transition-colors font-medium"
             >
-              Close
+              Back to Browse Pets
             </button>
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        {currentStep < 4 && (
+          <div className="flex justify-between mt-8 pt-6 border-t">
+            <button
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+            >
+              ← Previous
+            </button>
+            {currentStep < 3 ? (
+              <button
+                onClick={handleNext}
+                className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+              >
+                Next →
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+              >
+                {isSubmitting ? 'Submitting...' : 'Send Request'}
+              </button>
+            )}
           </div>
         )}
       </div>
