@@ -19,12 +19,20 @@ class AuthController extends Controller
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:6|confirmed',
+                'username' => 'nullable|string|max:255|unique:users',
+                'phone' => 'nullable|string|max:20',
+                'location' => 'nullable|string|max:255',
+                'avatar' => 'nullable|string|max:255',
             ]);
 
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
+                'username' => $data['username']?? null,
+                'phone' => $data['phone'] ?? null,
+                'location' => $data['location'] ?? null,
+                'avatar' => $data['avatar'] ?? null,
             ]);
 
             event(new Registered($user));
@@ -198,7 +206,7 @@ class AuthController extends Controller
                 'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $user->id,
                 'password' => 'sometimes|required|string|min:6|confirmed',
                 'phone' => 'sometimes|nullable|string|max:20',
-                'address' => 'sometimes|nullable|string|max:500',
+                'location' => 'sometimes|nullable|string|max:500',
                 'avatar' => 'sometimes|nullable|url',
 
             ]);

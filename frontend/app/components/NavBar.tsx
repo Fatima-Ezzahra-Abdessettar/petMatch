@@ -10,7 +10,7 @@ export default function NavBar() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      setIsScrolled(scrollTop > 200);
+      setIsScrolled(scrollTop > 50);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -115,9 +115,12 @@ export default function NavBar() {
         <div className="flex gap-4 items-center">
           {/* Desktop Buttons */}
           <div>
+            <Link to="/login">
             <button className="bg-btnPrimary px-10 py-2 text-BgLight text-lg rounded-lg hover:bg-[#cb763a] hover:transition-colors active:bg-[#b26228] hover:cursor-pointer md:block hidden">
               sign in
             </button>
+            </Link>
+            
           </div>
           <button
             onClick={toggleTheme}
@@ -309,9 +312,11 @@ export default function NavBar() {
               ></div>
               {/* sign in button */}
               <div className="flex justify-center">
+                <Link to="/login">
                 <button className="bg-btnPrimary px-10 py-2 text-BgLight text-lg rounded-lg hover:bg-[#cb763a] hover:transition-colors active:bg-[#b26228] hover:cursor-pointer">
                   sign in
                 </button>
+                </Link>
               </div>
             </div>
           </div>

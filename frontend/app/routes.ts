@@ -6,6 +6,12 @@ export default [
     route("/contact","routes/Contact.tsx"),
     route("/pets-list","routes/ListePets.tsx"),
     route("/pet/:id", "routes/PetProfile.tsx")
-  
-] satisfies RouteConfig;
+  ,
+    route("/profile","routes/Profile.tsx"),
+    route("/favorites", "routes/Favorites.tsx"),
+    route("/welcome-user", "routes/WelcomeUser.tsx"),
+    route("/login","routes/Login.tsx"),      // lowercase
+    route("/register","routes/Register.tsx"),  // lowercase
+    route("/error","routes/Error.tsx")
+  ] satisfies RouteConfig;
 
