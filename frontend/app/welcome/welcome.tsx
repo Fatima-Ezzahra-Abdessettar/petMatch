@@ -562,7 +562,7 @@ export default function Welcome() {
         </div>
       </section>
       {/* Reviews Section */}
-<section>
+<section id="reviews">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-25">
     <h2
       className="text-4xl md:text-5xl lg:text-6xl font-playfair text-center mb-12 lg:mb-16"
@@ -742,7 +742,7 @@ export default function Welcome() {
 </section>
 
       {/* FAQ Section */}
-      <section
+      <section id="FAQ"
         className={`py-16 lg:py-24 ${isDarkMode ? "bg-[#36332E]" : "bg-[#F7F5EA]"} transition-colors duration-300`}
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
