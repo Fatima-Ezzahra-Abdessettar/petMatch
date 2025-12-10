@@ -403,7 +403,7 @@ export default function Welcome() {
       </section>
       {/* Our Pets Section */}
       <section className="py-16 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-25">
           <h2
             className="text-4xl md:text-5xl lg:text-6xl font-playfair text-center mb-12 lg:mb-16"
             style={{ color: isDarkMode ? "#F5F3ED" : "#36332E" }}
@@ -561,6 +561,185 @@ export default function Welcome() {
           </div>
         </div>
       </section>
+      {/* Reviews Section */}
+<section>
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-25">
+    <h2
+      className="text-4xl md:text-5xl lg:text-6xl font-playfair text-center mb-12 lg:mb-16"
+      style={{ color: isDarkMode ? "#F5F3ED" : "#36332E" }}
+    >
+      What Our Adopters Say
+    </h2>
+
+    <div className="relative max-w-6xl mx-auto">
+      <div className="overflow-hidden rounded-3xl">
+        <div
+          className="flex transition-transform duration-500 ease-in-out"
+          style={{
+            transform: `translateX(-${currentReviewIndex * (100 / visibleCount)}%)`,
+          }}
+        >
+          {reviews.map((review, index) => (
+            <div
+              key={index}
+              className="flex-shrink-0 px-3"
+              style={{ width: `${100 / visibleCount}%` }}
+            >
+              <div
+                className="rounded-2xl p-6 lg:p-8 h-full min-h-[350px] flex flex-col transition-all duration-300 hover:scale-105"
+                style={{
+                  backgroundColor: isDarkMode ? "rgba(115, 101, 91, 0.3)" : "rgba(255, 255, 255, 0.9)",
+                }}
+              >
+                {/* Header with avatar and info */}
+                <div className="flex items-center gap-4 mb-4">
+                  <img
+                    src={review.image}
+                    alt={review.name}
+                    className="w-16 h-16 rounded-full object-cover ring-4"
+                    style={{
+                      borderColor: isDarkMode ? "#D97F3E" : "#D97F3E"
+                    }}
+                  />
+                  <div>
+                    <h3
+                      className="font-bold text-lg"
+                      style={{ color: isDarkMode ? "#F7F5EA" : "#36332E" }}
+                    >
+                      {review.name}
+                    </h3>
+                    <p
+                      className="text-sm"
+                      style={{ color: isDarkMode ? "#928e85" : "#6b7280" }}
+                    >
+                      {review.country}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Star rating */}
+                <div className="flex gap-1 mb-3">
+                  {[...Array(5)].map((_, i) => (
+                    <svg
+                      key={i}
+                      className="w-5 h-5"
+                      fill="#D97F3E"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+
+                {/* Review title */}
+                <h4
+                  className="font-bold text-xl mb-3"
+                  style={{ color: isDarkMode ? "#F5F3ED" : "#36332E" }}
+                >
+                  {review.title}
+                </h4>
+
+                {/* Review text */}
+                <p
+                  className="text-base leading-relaxed flex-grow"
+                  style={{ color: isDarkMode ? "#F7F5EA" : "#4b5563" }}
+                >
+                  "{review.text}"
+                </p>
+
+                {/* Quote icon decoration */}
+                <div className="mt-4 flex justify-end">
+                  <svg
+                    className="w-8 h-8 opacity-20"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                    style={{ color: isDarkMode ? "#D97F3E" : "#D97F3E" }}
+                  >
+                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Navigation Buttons */}
+      <button
+        onClick={() =>
+          setCurrentReviewIndex(Math.max(0, currentReviewIndex - 1))
+        }
+        disabled={currentReviewIndex === 0}
+        className={`absolute -left-6 lg:-left-20 top-1/2 -translate-y-1/2 w-12 h-12 lg:w-16 lg:h-16 rounded-full 
+          ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-white hover:bg-gray-100"} 
+          shadow-xl flex items-center justify-center transition-all duration-300
+          disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 active:scale-95
+          hidden md:flex`}
+      >
+        <svg
+          className="w-6 h-6 lg:w-8 lg:h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+      </button>
+
+      <button
+        onClick={() =>
+          setCurrentReviewIndex(
+            Math.min(reviews.length - visibleCount, currentReviewIndex + 1)
+          )
+        }
+        disabled={currentReviewIndex >= reviews.length - visibleCount}
+        className={`absolute -right-6 lg:-right-20 top-1/2 -translate-y-1/2 w-12 h-12 lg:w-16 lg:h-16 rounded-full 
+          ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-white hover:bg-gray-100"} 
+          shadow-xl flex items-center justify-center transition-all duration-300
+          disabled:opacity-30 disabled:cursor-not-allowed hover:scale-110 active:scale-95
+          hidden md:flex`}
+      >
+        <svg
+          className="w-6 h-6 lg:w-8 lg:h-8"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2.5}
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
+      </button>
+
+      {/* Pagination Dots */}
+      <div className="flex justify-center mt-8 space-x-2">
+        {[...Array(Math.max(0, reviews.length - visibleCount + 1))].map(
+          (_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentReviewIndex(index)}
+              className={`h-3 rounded-full transition-all duration-300 ${
+                currentReviewIndex === index
+                  ? "bg-[#D97F3E] w-8"
+                  : isDarkMode
+                    ? "bg-gray-600 w-3"
+                    : "bg-gray-300 w-3"
+              }`}
+            />
+          )
+        )}
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* FAQ Section */}
       <section
