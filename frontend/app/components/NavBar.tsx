@@ -81,19 +81,19 @@ export default function NavBar() {
               about
             </Link>
             <a
-              href="#laterWillBeAdded"
-              className="hover:text-btnPrimary transition-colors"
-              style={{ color: isDarkMode ? "#F7F5EA" : "#36332E" }}
-            >
-              laterWillBeAdded
-            </a>
-            <a
-              href="#reviews"
+              href="/#reviews"
               className="hover:text-btnPrimary transition-colors"
               style={{ color: isDarkMode ? "#F7F5EA" : "#36332E" }}
             >
               reviews
             </a>
+            <Link
+              to={"/#FAQ"}
+              className="hover:text-btnPrimary transition-colors"
+              style={{ color: isDarkMode ? "#F7F5EA" : "#36332E" }}
+            >
+              FAQ
+            </Link>
             <Link
               to={"/our-pets"}
               className="hover:text-btnPrimary transition-colors"
