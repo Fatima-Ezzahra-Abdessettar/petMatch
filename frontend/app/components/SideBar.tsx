@@ -1,23 +1,21 @@
 import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { 
+import {
   HomeIcon,
   ClipboardDocumentListIcon,
   UserCircleIcon,
   Cog6ToothIcon,
   HeartIcon,
   Bars3Icon,
-  XMarkIcon,
   ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
-import { 
+import {
   HomeIcon as HomeIconSolid,
   ClipboardDocumentListIcon as ClipboardDocumentListIconSolid,
   UserCircleIcon as UserCircleIconSolid,
   Cog6ToothIcon as Cog6ToothIconSolid,
   HeartIcon as HeartIconSolid
 } from '@heroicons/react/24/solid';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDog } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../contexts/auth';
@@ -38,50 +36,13 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
     navigate('/login');
   };
 
-  // Configuration des liens de navigation (incluant Favorites)
   const menuItems = [
-    { 
-      path: '/welcome-user', 
-      label: 'home', 
-      icon: HomeIcon,
-      activeIcon: HomeIconSolid,
-      type: 'heroicon'
-    },
-    { 
-      path: '/mes-demandes', 
-      label: 'Mes demandes', 
-      icon: ClipboardDocumentListIcon,
-      activeIcon: ClipboardDocumentListIconSolid,
-      type: 'heroicon'
-    },
-    { 
-      path: '/pets', 
-      label: 'pets', 
-      icon: faDog,
-      activeIcon: faDog,
-      type: 'fontawesome'
-    },
-    { 
-      path: '/profile', 
-      label: 'profile', 
-      icon: UserCircleIcon,
-      activeIcon: UserCircleIconSolid,
-      type: 'heroicon'
-    },
-    { 
-      path: '/settings', 
-      label: 'Settings', 
-      icon: Cog6ToothIcon,
-      activeIcon: Cog6ToothIconSolid,
-      type: 'heroicon'
-    },
-    { 
-      path: '/favorites', 
-      label: 'Favorites',
-      icon: HeartIcon,
-      activeIcon: HeartIconSolid,
-      type: 'heroicon'
-    },
+    { path: '/welcome-user', label: 'home', icon: HomeIcon, activeIcon: HomeIconSolid, type: 'heroicon' },
+    { path: '/mes-demandes', label: 'Mes demandes', icon: ClipboardDocumentListIcon, activeIcon: ClipboardDocumentListIconSolid, type: 'heroicon' },
+    { path: '/pets-list', label: 'Pets', icon: faDog, activeIcon: faDog, type: 'fontawesome' },
+    { path: '/profile', label: 'profile', icon: UserCircleIcon, activeIcon: UserCircleIconSolid, type: 'heroicon' },
+    { path: '/settings', label: 'Settings', icon: Cog6ToothIcon, activeIcon: Cog6ToothIconSolid, type: 'heroicon' },
+    { path: '/favorites', label: 'Favorites', icon: HeartIcon, activeIcon: HeartIconSolid, type: 'heroicon' },
   ];
 
   // Get user info from UserContext
@@ -92,101 +53,94 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
 
   return (
     <>
-      {/* Bouton menu burger */}
+      {/* Bouton burger quand sidebar fermée */}
       {!isOpen && (
-        <button 
+        <button
           onClick={toggleSidebar}
-          className="menu-toggle-btn"
+          className="fixed top-5 left-5 z-[1100] flex items-center justify-center w-10 h-10 bg-[#F3F0E8]/95 rounded-lg shadow-lg hover:scale-105 transition-transform"
           aria-label="Ouvrir le menu"
         >
-          <Bars3Icon className="icon-24" />
+          <Bars3Icon className="w-6 h-6 text-[#36332E]" />
         </button>
       )}
 
       {/* Sidebar */}
-      <aside className={`sidebar ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
-        {/* En-tête */}
-        <div className="sidebar-header">
-          <div className="flex items-center gap-2 mb-4">
-            <button 
-              onClick={toggleSidebar}
-              className="cursor-pointer"
-              aria-label="Toggle menu"
-            >
-              <Bars3Icon className="icon-24" style={{ color: 'var(--text-normal)' }} />
+      <aside
+        className={`fixed left-0 top-0 h-screen bg-[#D29059] flex flex-col transition-all duration-300 ease-in-out z-[100] overflow-hidden
+          ${isOpen 
+            ? 'w-52 lg:w-52' 
+            : 'w-52 lg:w-20 -translate-x-full lg:translate-x-0'
+          }`}
+      >
+        {/* Header */}
+        <div className="px-4 pt-6 pb-4">
+          <div className="flex items-center gap-3">
+            <button onClick={toggleSidebar} className="text-[#FEF3DD] hover:bg-white/10 p-2 rounded-lg transition">
+              <Bars3Icon className="w-6 h-6" />
             </button>
-            {isOpen && <div className="menu-title">MENU</div>}
+            {isOpen && <span className="text-[#FEF3DD] text-xs font-semibold tracking-widest uppercase">Menu</span>}
           </div>
         </div>
 
-        {/* Navigation principale */}
-        <nav className="sidebar-nav">
-          <ul className="nav-list">
-            {menuItems.map((item) => {
-              return (
-                <li key={item.path}>
-                  <NavLink
-                    to={item.path}
-                    className={({ isActive }) => 
-                      `nav-link ${!isOpen ? 'nav-link-centered' : ''}`
-                    }
-                    title={!isOpen ? item.label : ''}
-                  >
-                    {({ isActive }) => {
-                      if (item.type === 'fontawesome') {
-                        return (
-                          <>
-                            <FontAwesomeIcon 
-                              icon={item.icon as any} 
-                              className="nav-icon" 
-                            />
-                            {isOpen && <span className="nav-label">{item.label}</span>}
-                          </>
-                        );
-                      } else {
-                        const Icon = (isActive ? item.activeIcon : item.icon) as React.ComponentType<{ className?: string }>;
-                        return (
-                          <>
-                            <Icon className="nav-icon" />
-                            {isOpen && <span className="nav-label">{item.label}</span>}
-                          </>
-                        );
-                      }
-                    }}
-                  </NavLink>
-                </li>
-              );
-            })}
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 overflow-y-auto">
+          <ul className="space-y-2">
+            {menuItems.map((item) => (
+              <li key={item.path}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      isActive
+                        ? 'bg-[#F3F0E8]/95 text-[#D29059] font-medium'
+                        : 'text-[#FEF3DD] hover:bg-white/10'
+                    } ${!isOpen && 'justify-center'}`
+                  }
+                  title={!isOpen ? item.label : ''}
+                >
+                  {({ isActive }) => (
+                    <>
+                      {item.type === 'fontawesome' ? (
+                        <FontAwesomeIcon
+                          icon={item.icon as any}
+                          className={`w-5 h-5 ${isActive ? 'text-[#D29059]' : 'text-[#FEF3DD]'}`}
+                        />
+                      ) : (
+                        <>
+                          {isActive ? (
+                            <item.activeIcon className="w-5 h-5 text-[#D29059]" />
+                          ) : (
+                            <item.icon className="w-5 h-5 text-[#FEF3DD]" />
+                          )}
+                        </>
+                      )}
+                      {isOpen && <span className="text-sm font-medium capitalize">{item.label}</span>}
+                    </>
+                  )}
+                </NavLink>
+              </li>
+            ))}
           </ul>
         </nav>
 
-        {/* Pied de page utilisateur */}
-        <div className="sidebar-footer">
-          <div className="user-info">
-            <div className="user-avatar">
-              {userAvatar ? (
-                <img 
-                  src={userAvatar} 
-                  alt="User avatar" 
-                  className="avatar-img"
-                />
-              ) : (
-                <UserCircleIcon className="icon-24" />
-              )}
+        {/* Footer utilisateur */}
+        <div className="p-4 border-t border-white/20">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-[#F3F0E8]/95 rounded-full flex items-center justify-center flex-shrink-0">
+              <UserCircleIcon className="w-8 h-8 text-[#D29059]" />
             </div>
             {isOpen && (
               <>
-                <div className="user-details">
-                  <div className="user-name">{userName}</div>
-                  <div className="user-email">{userEmail}</div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[#FEF3DD] font-semibold text-sm truncate">{userName}</p>
+                  <p className="text-[#FEF3DD]/80 text-xs truncate">{userEmail}</p>
                 </div>
-                <button 
+                <button
                   onClick={handleLogout}
-                  className="logout-btn"
-                  aria-label="Logout"
-                  title="Logout"
+                  className="text-red-500 hover:scale-110 transition-transform p-2"
+                  aria-label="Déconnexion"
                 >
-                  <ArrowRightOnRectangleIcon className="icon-20" style={{ color: '#ef4444' }} />
+                  <ArrowRightOnRectangleIcon className="w-5 h-5" />
                 </button>
               </>
             )}
