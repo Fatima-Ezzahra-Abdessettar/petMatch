@@ -47,7 +47,7 @@ const PersonalDetailsForm = forwardRef<PersonalDetailsFormHandle, PersonalDetail
                 phone: user.phone || '',
                 email: user.email || ''
             });
-            setSelectedAvatar(user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=1');
+            setSelectedAvatar(user.avatar || 'https://img.freepik.com/free-psd/3d-illustration-person-with-sunglasses_23-2149436180.jpg?t=st=1765361086~exp=1765364686~hmac=7cdd4763ea8b5dc52d37988ab77c005fefdf479f2c4e12359dfa94af43c4cc61&w=1480');
         }
     }, [user, reset]);
 
