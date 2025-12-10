@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
-import { CheckIcon } from '@heroicons/react/24/solid';
-import { UserCircleIcon } from '@heroicons/react/24/solid';
+import React from 'react';
+import { FiX } from 'react-icons/fi';
 
 interface AvatarSelectionModalProps {
     isOpen: boolean;
@@ -17,52 +16,57 @@ const AvatarSelectionModal: React.FC<AvatarSelectionModalProps> = ({
     currentAvatar,
     avatars
 }) => {
-    const [selectedAvatar, setSelectedAvatar] = useState(currentAvatar);
-
     if (!isOpen) return null;
 
-    const handleSave = () => {
-        onSelect(selectedAvatar);
-    };
-
     return (
-        <div 
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            onClick={onClose}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Backdrop */}
             <div 
-                className="bg-white rounded-lg p-6 max-w-md w-full mx-4"
-                onClick={(e) => e.stopPropagation()}
-            >
+                className="absolute inset-0 bg-black bg-opacity-50"
+                onClick={onClose}
+            />
+            
+            {/* Modal */}
+            <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-4 p-6 z-10">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-semibold text-gray-800">Choose Your Avatar</h3>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <FiX size={24} />
+                    </button>
+                </div>
+
+                {/* Avatar Grid */}
                 <div className="grid grid-cols-3 gap-4 mb-6">
                     {avatars.map((avatar, index) => (
-                        <div
-                            key={avatar}
-                            className={`relative w-20 h-20 rounded-full cursor-pointer border-2 transition-all ${
-                                selectedAvatar === avatar
-                                    ? 'border-green-500'
-                                    : 'border-gray-300 hover:border-gray-400'
+                        <button
+                            key={index}
+                            onClick={() => onSelect(avatar)}
+                            className={`relative rounded-full overflow-hidden transition-all hover:scale-105 ${
+                                currentAvatar === avatar 
+                                    ? 'ring-4 ring-blue-500 ring-offset-2' 
+                                    : 'ring-2 ring-gray-200 hover:ring-blue-300'
                             }`}
-                            onClick={() => setSelectedAvatar(avatar)}
                         >
-                            <div className="w-full h-full rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                                <UserCircleIcon className="w-full h-full text-gray-400" />
-                            </div>
-                            {selectedAvatar === avatar && (
-                                <div className="absolute bottom-0 right-0 bg-green-500 rounded-full p-1">
-                                    <CheckIcon className="w-4 h-4 text-white" />
-                                </div>
-                            )}
-                        </div>
+                            <img
+                                src={avatar}
+                                alt={`Avatar ${index + 1}`}
+                                className="w-full h-full object-cover aspect-square"
+                            />
+                        </button>
                     ))}
                 </div>
-                
-                <div className="flex justify-end">
+
+                {/* Footer */}
+                <div className="flex justify-end gap-3">
                     <button
-                        onClick={handleSave}
-                        className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors font-medium"
+                        onClick={onClose}
+                        className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
                     >
-                        Save
+                        Cancel
                     </button>
                 </div>
             </div>
@@ -71,4 +75,3 @@ const AvatarSelectionModal: React.FC<AvatarSelectionModalProps> = ({
 };
 
 export default AvatarSelectionModal;
-

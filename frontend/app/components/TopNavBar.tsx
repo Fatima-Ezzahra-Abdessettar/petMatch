@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { EnvelopeIcon, BellIcon, Bars3Icon } from '@heroicons/react/24/outline';
-import { UserCircleIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
+import React, { useState, useContext } from 'react';
+import { BellIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon, ChevronDownIcon, Cog6ToothIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '../contexts/auth';
+import { UserContext } from '../contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
 
 interface TopNavBarProps {
@@ -10,10 +11,15 @@ interface TopNavBarProps {
 }
 
 const TopNavBar: React.FC<TopNavBarProps> = ({ onProfileClick, onMenuClick }) => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const userContext = useContext(UserContext);
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const user = userContext?.user;
+  const userName = user?.name || '';
+  const userAvatar = user?.avatar;
 
   const handleLogout = async () => {
     await logout();
@@ -22,10 +28,11 @@ const TopNavBar: React.FC<TopNavBarProps> = ({ onProfileClick, onMenuClick }) =>
 
   return (
     <div 
-      className="fixed top-0 right-0 z-30 flex items-center gap-4 p-4"
+      className="fixed top-0 right-0 z-30 flex items-center gap-3 px-6 py-3"
       style={{
-        backgroundColor: 'rgba(128, 128, 128, 0.3)',
-        backdropFilter: 'blur(4px)',
+        backgroundColor: 'rgba(245, 245, 245, 0.95)',
+        backdropFilter: 'blur(10px)',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
       }}
     >
       
@@ -33,26 +40,42 @@ const TopNavBar: React.FC<TopNavBarProps> = ({ onProfileClick, onMenuClick }) =>
       <div className="relative">
         <button
           onClick={() => setShowNotifications(!showNotifications)}
-          className="relative p-2 rounded-full hover:bg-gray-800 transition-colors"
+          className="relative p-2 rounded-lg hover:bg-gray-200 transition-colors"
         >
-          <BellIcon className="w-6 h-6 text-white" />
-          <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-gray-900"></span>
+          <BellIcon className="w-6 h-6 text-gray-700" />
+          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
         </button>
         
         {showNotifications && (
-          <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg py-2 z-50">
-            <div className="px-4 py-2 border-b border-gray-200">
-              <h3 className="font-semibold text-gray-800">Notifications</h3>
+          <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100">
+            <div className="px-4 py-3 border-b border-gray-100">
+              <h3 className="font-semibold text-gray-800 text-sm">Notifications</h3>
             </div>
-            <div className="px-4 py-3 flex items-center gap-3 hover:bg-gray-50 cursor-pointer">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs">H</span>
+            <div className="max-h-96 overflow-y-auto">
+              <div className="px-4 py-3 flex items-start gap-3 hover:bg-gray-50 cursor-pointer transition-colors">
+                <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-sm font-semibold">H</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-800 font-medium">New message</p>
+                  <p className="text-xs text-gray-500 mt-1">Hello! How can we help you today?</p>
+                  <p className="text-xs text-gray-400 mt-1">2 minutes ago</p>
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="text-sm text-gray-800">Hello</p>
+              <div className="px-4 py-3 flex items-start gap-3 hover:bg-gray-50 cursor-pointer transition-colors">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-sm font-semibold">P</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-800 font-medium">Profile updated</p>
+                  <p className="text-xs text-gray-500 mt-1">Your profile has been successfully updated</p>
+                  <p className="text-xs text-gray-400 mt-1">1 hour ago</p>
+                </div>
               </div>
-              <button className="px-3 py-1 bg-orange-500 text-white text-xs rounded hover:bg-orange-600">
-                view
+            </div>
+            <div className="px-4 py-2 border-t border-gray-100">
+              <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                View all notifications
               </button>
             </div>
           </div>
@@ -63,51 +86,71 @@ const TopNavBar: React.FC<TopNavBarProps> = ({ onProfileClick, onMenuClick }) =>
       <div className="relative">
         <button
           onClick={() => setShowProfileMenu(!showProfileMenu)}
-          className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-800 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors"
         >
-          <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
-            <UserCircleIcon className="w-10 h-10 text-gray-600" />
+          <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+            {userAvatar ? (
+              <img 
+                src={userAvatar} 
+                alt="User avatar" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <UserCircleIcon className="w-9 h-9 text-gray-600" />
+            )}
           </div>
-          <ChevronDownIcon className="w-4 h-4 text-white" />
+          <span className="text-sm font-medium text-gray-700">{userName}</span>
+          <ChevronDownIcon className="w-4 h-4 text-gray-600" />
         </button>
 
         {showProfileMenu && (
-          <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50">
-            <div className="px-4 py-2 border-b border-gray-200">
-              <p className="font-semibold text-gray-800">{user?.name || 'User'}</p>
+          <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-100">
+            <div className="px-4 py-3 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                  {userAvatar ? (
+                    <img 
+                      src={userAvatar} 
+                      alt="User avatar" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <UserCircleIcon className="w-10 h-10 text-gray-600" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-800 text-sm truncate">{userName}</p>
+                  <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                </div>
+              </div>
             </div>
             <button
               onClick={() => {
                 navigate('/profile');
                 setShowProfileMenu(false);
               }}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+              className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
             >
-              <UserCircleIcon className="w-5 h-5" />
-              Profile
+              <UserCircleIcon className="w-5 h-5 text-gray-600" />
+              <span>My Profile</span>
             </button>
             <button
               onClick={() => {
                 navigate('/settings');
                 setShowProfileMenu(false);
               }}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+              className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Settings
+              <Cog6ToothIcon className="w-5 h-5 text-gray-600" />
+              <span>Settings</span>
             </button>
-            <div className="border-t border-gray-200 my-1"></div>
+            <div className="border-t border-gray-100 my-1"></div>
             <button
               onClick={handleLogout}
-              className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+              className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Sign out
+              <ArrowRightOnRectangleIcon className="w-5 h-5 text-red-600" />
+              <span>Sign out</span>
             </button>
           </div>
         )}
@@ -128,4 +171,3 @@ const TopNavBar: React.FC<TopNavBarProps> = ({ onProfileClick, onMenuClick }) =>
 };
 
 export default TopNavBar;
-

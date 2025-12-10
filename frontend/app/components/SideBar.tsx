@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   HomeIcon,
@@ -21,6 +21,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDog } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../contexts/auth';
+import { UserContext } from '../contexts/UserContext';
 
 interface SideBarProps {
   isOpen: boolean;
@@ -28,7 +29,8 @@ interface SideBarProps {
 }
 
 const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const userContext = useContext(UserContext);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -82,9 +84,11 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
     },
   ];
 
-  // Get user info from auth context
+  // Get user info from UserContext
+  const user = userContext?.user;
   const userName = user?.name || 'User';
   const userEmail = user?.email || 'user@email.com';
+  const userAvatar = user?.avatar;
 
   return (
     <>
@@ -160,7 +164,15 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
         <div className="sidebar-footer">
           <div className="user-info">
             <div className="user-avatar">
-              <UserCircleIcon className="icon-24" />
+              {userAvatar ? (
+                <img 
+                  src={userAvatar} 
+                  alt="User avatar" 
+                  className="avatar-img"
+                />
+              ) : (
+                <UserCircleIcon className="icon-24" />
+              )}
             </div>
             {isOpen && (
               <>
@@ -366,6 +378,13 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
+          overflow: hidden;
+        }
+
+        .avatar-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
 
         .user-details {

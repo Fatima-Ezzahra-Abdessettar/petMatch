@@ -13,7 +13,6 @@ interface UserFormData {
     location: string;
     phone: string;
     email: string;
-    avatar?: string;
 }
 
 interface PersonalDetailsFormProps {
@@ -27,7 +26,7 @@ export interface PersonalDetailsFormHandle {
 const PersonalDetailsForm = forwardRef<PersonalDetailsFormHandle, PersonalDetailsFormProps>(({ user }, ref) => {
     const { setUser } = useContext(UserContext)!;
     const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
-    const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || 'avatar1');
+    const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=1');
     const [isLoading, setIsLoading] = useState(false);
     
     const { register, handleSubmit, formState: { errors }, reset } = useForm<UserFormData>({
@@ -35,8 +34,7 @@ const PersonalDetailsForm = forwardRef<PersonalDetailsFormHandle, PersonalDetail
             name: user?.name || '',
             location: user?.location || '',
             phone: user?.phone || '',
-            email: user?.email || '',
-            avatar: selectedAvatar
+            email: user?.email || ''
         }
     });
 
@@ -47,17 +45,25 @@ const PersonalDetailsForm = forwardRef<PersonalDetailsFormHandle, PersonalDetail
                 name: user.name || '',
                 location: user.location || '',
                 phone: user.phone || '',
-                email: user.email || '',
-                avatar: user.avatar || selectedAvatar
+                email: user.email || ''
             });
-            setSelectedAvatar(user.avatar || 'avatar1');
+            setSelectedAvatar(user.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=1');
         }
     }, [user, reset]);
 
     const onSubmit = async (data: UserFormData) => {
         setIsLoading(true);
         try {
-            const res = await api.put('/api/me', { ...data, avatar: selectedAvatar });
+            // Only send the fields we want to update (no password fields)
+            const updateData = {
+                name: data.name,
+                location: data.location,
+                phone: data.phone,
+                email: data.email,
+                avatar: selectedAvatar
+            };
+
+            const res = await api.put('/api/me', updateData);
             if (setUser) {
                 setUser({ ...user, ...res.data.user, avatar: selectedAvatar });
             }
@@ -67,10 +73,22 @@ const PersonalDetailsForm = forwardRef<PersonalDetailsFormHandle, PersonalDetail
             });
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || 'Failed to update profile';
-            toast.error(errorMessage, {
-                position: 'top-right',
-                autoClose: 5000,
-            });
+            const errors = error.response?.data?.errors;
+            
+            if (errors) {
+                // Display validation errors
+                Object.values(errors).flat().forEach((err: any) => {
+                    toast.error(err, {
+                        position: 'top-right',
+                        autoClose: 5000,
+                    });
+                });
+            } else {
+                toast.error(errorMessage, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                });
+            }
         } finally {
             setIsLoading(false);
         }
@@ -88,12 +106,23 @@ const PersonalDetailsForm = forwardRef<PersonalDetailsFormHandle, PersonalDetail
         if (setUser) {
             setUser({ ...user, avatar });
         }
+        toast.success('Avatar updated! Click "Save Changes" to confirm.', {
+            position: 'top-right',
+            autoClose: 3000,
+        });
     };
 
-    // Sample avatar options - you can replace these with actual avatar images
+    // Avatar options with actual image URLs
     const avatarOptions = [
-        'avatar1', 'avatar2', 'avatar3', 'avatar4', 
-        'avatar5', 'avatar6', 'avatar7', 'avatar8', 'avatar9'
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=1',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=2',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=3',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=4',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=5',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=6',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=7',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=8',
+        'https://api.dicebear.com/7.x/avataaars/svg?seed=9',
     ];
 
     return (
@@ -106,7 +135,15 @@ const PersonalDetailsForm = forwardRef<PersonalDetailsFormHandle, PersonalDetail
                     <label className="block text-sm font-medium text-gray-700 mb-2">Photo</label>
                     <div className="flex items-center gap-4">
                         <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                            <UserCircleIcon className="w-20 h-20 text-gray-400" />
+                            {selectedAvatar ? (
+                                <img 
+                                    src={selectedAvatar} 
+                                    alt="User avatar" 
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <UserCircleIcon className="w-20 h-20 text-gray-400" />
+                            )}
                         </div>
                         <button
                             type="button"
