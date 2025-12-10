@@ -3,15 +3,14 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faChevronLeft,
-  faChevronRight,
-  faHeart as faHeartRegular,
   faArrowLeft,
+  faHeart as faHeartRegular,
   faSpinner,
   faExclamationTriangle,
 } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
-import { UserContext } from '~/contexts/UserContext'; // ← même chemin que dans Favorites.tsx
+import Sidebar from '../components/SideBar'; 
+import { UserContext } from '~/contexts/UserContext';
 
 interface Pet {
   id: number;
@@ -39,24 +38,30 @@ const PetProfile: React.FC = () => {
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+
+  // État de la sidebar (partagé avec listepets)
+  const [isOpen, setIsOpen] = useState(true);
+  const toggleSidebar = () => setIsOpen(prev => !prev);
 
   const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
-const API_URL = `http://localhost:8000/api/pets/${id}`;  
-  const isFavorite = favorites.some((fav: any) => fav.id === Number(id));
+  const API_URL = `http://127.0.0.1:8000/api/pets/${id}`;
+
+  const isFavorite = pet ? favorites.some((fav: any) => fav.id === pet.id) : false;
 
   useEffect(() => {
     const fetchPet = async () => {
+      if (!id) return;
       setLoading(true);
+      setError(null);
       try {
         const response = await fetch(API_URL, {
           headers: {
-            'Accept': 'application/json',
-            'Authorization': token ? `Bearer ${token}` : '',
+            Accept: 'application/json',
+            Authorization: token ? `Bearer ${token}` : '',
           },
         });
 
-        if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
+        if (!response.ok) throw new Error(`Erreur ${response.status}`);
         const data: Pet = await response.json();
         setPet(data);
       } catch (err: any) {
@@ -74,49 +79,126 @@ const API_URL = `http://localhost:8000/api/pets/${id}`;
     await toggleFavorite(pet.id, isFavorite);
   };
 
-  const photos = pet?.profile_picture ? [pet.profile_picture] : [];
+  // Loading
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-[#E5E5E5]">
+        <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
+        <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${isOpen ? 'lg:ml-52' : 'lg:ml-20'}`}>
+          <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#D29059" />
+        </div>
+      </div>
+    );
+  }
 
-  if (loading) return <div className="min-h-screen bg-[#E5E5E5] flex items-center justify-center"><FontAwesomeIcon icon={faSpinner} spin size="3x" color="#D29059" /></div>;
-  if (error || !pet) return <div className="min-h-screen bg-[#E5E5E5] flex items-center justify-center"><div className="bg-white p-10 rounded-xl shadow-lg text-center"><h3 className="text-2xl font-bold">Animal non trouvé</h3><p>{error}</p><button onClick={() => navigate(-1)} className="mt-4 px-6 py-3 bg-[#D29059] text-white rounded-lg">Retour</button></div></div>;
+  // Error ou pet non trouvé
+  if (error || !pet) {
+    return (
+      <div className="flex min-h-screen bg-[#E5E5E5]">
+        <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
+        <div className={`flex-1 flex items-center justify-center p-5 transition-all duration-300 ${isOpen ? 'lg:ml-52' : 'lg:ml-20'}`}>
+          <div className="text-center bg-white p-10 rounded-2xl shadow-xl max-w-md">
+            <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#ff6b6b" className="mb-4" />
+            <h3 className="text-2xl font-bold text-[#333] mb-3">Animal non trouvé</h3>
+            <p className="text-[#666] mb-6">{error || "Cet animal n'existe pas ou a été supprimé."}</p>
+            <button
+              onClick={() => navigate(-1)}
+              className="px-8 py-3 bg-[#D29059] text-white rounded-xl hover:bg-[#c57a45] transition"
+            >
+              Retour
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#E5E5E5] py-10 px-5">
-      <div className="max-w-6xl mx-auto">
-        <button onClick={() => navigate(-1)} className="mb-6 flex items-center gap-2 text-[#666] hover:text-[#D29059] text-sm font-medium">
-          <FontAwesomeIcon icon={faArrowLeft} /> Retour à la liste
-        </button>
+    <div className="flex min-h-screen bg-[#E5E5E5]">
+      {/* Sidebar */}
+      <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="p-8 lg:p-12">
-            <div className="flex justify-between items-start mb-8">
-              <h1 className="text-4xl font-bold text-[#333]">{pet.name}</h1>
-              <button onClick={handleToggleFavorite} className="hover:scale-110 transition">
-                <FontAwesomeIcon
-                  icon={isFavorite ? faHeartSolid : faHeartRegular}
-                  className={`text-4xl ${isFavorite ? 'text-red-500' : 'text-gray-400'}`}
-                />
-              </button>
-            </div>
+      {/* Contenu principal */}
+      <div className={`transition-all duration-300 ${isOpen ? 'lg:ml-52' : 'lg:ml-0'}`}>
+        <div className="p-5 md:p-8 lg:p-10 max-w-7xl mx-auto">
+          {/* Bouton retour */}
+          <button
+            onClick={() => navigate(-1)}
+            className="mb-8 flex items-center gap-3 text-[#666] hover:text-[#D29059] text-lg font-medium transition-colors"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+            Retour à la liste
+          </button>
 
-            <div className="grid lg:grid-cols-2 gap-10">
-              <div className="relative rounded-2xl overflow-hidden">
-                <img src={photos[currentPhotoIndex] || '/placeholder-pet.jpg'} alt={pet.name} className="w-full h-[500px] object-cover" />
+          {/* Carte principale */}
+          <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <div className="p-6 md:p-10 lg:p-12">
+              {/* En-tête */}
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-6 mb-10">
+                <div>
+                  <h1 className="text-4xl md:text-5xl font-bold text-[#333]">{pet.name}</h1>
+                  <p className="text-xl text-[#666] mt-2">
+                    {pet.gender === 'male' ? 'Mâle' : 'Femelle'} • {pet.age} an{pet.age > 1 ? 's' : ''}
+                  </p>
+                </div>
+                <button
+                  onClick={handleToggleFavorite}
+                  className="p-4 rounded-2xl bg-[#f9f9f9] hover:bg-[#FEF3DD] hover:scale-110 transition-all"
+                  aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                >
+                  <FontAwesomeIcon
+                    icon={isFavorite ? faHeartSolid : faHeartRegular}
+                    className={`text-4xl ${isFavorite ? 'text-red-500' : 'text-gray-400'}`}
+                  />
+                </button>
               </div>
 
-              <div className="space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                  <div><label className="text-sm text-[#999]">Nom</label><div className="mt-1 px-4 py-3 bg-[#f9f9f9] rounded-lg font-medium">{pet.name}</div></div>
-                  <div><label className="text-sm text-[#999]">Âge</label><div className="mt-1 px-4 py-3 bg-[#f9f9f9] rounded-lg font-medium">{pet.age} an{pet.age > 1 ? 's' : ''}</div></div>
+              {/* Grille responsive : photo + infos */}
+              <div className="grid lg:grid-cols-2 gap-10 xl:gap-16">
+                {/* Photo */}
+                <div className="relative group">
+                  <div className="rounded-3xl overflow-hidden shadow-2xl">
+                    <img
+                      src={pet.profile_picture || '/placeholder-pet.jpg'}
+                      alt={pet.name}
+                      className="w-full h-96 md:h-[500px] lg:h-[600px] object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="text-sm text-[#999]">Description</label>
-                  <div className="mt-1 px-4 py-4 bg-[#f9f9f9] rounded-lg leading-relaxed">{pet.description || 'Aucune description disponible.'}</div>
-                </div>
+                {/* Infos */}
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#333] mb-4">Informations</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <InfoItem label="Espèce" value={pet.species === 'dog' ? 'Chien' : pet.species === 'cat' ? 'Chat' : pet.species} />
+                      <InfoItem label="Race" value={pet.type || 'Non spécifiée'} />
+                      <InfoItem label="Âge" value={`${pet.age} an${pet.age > 1 ? 's' : ''}`} />
+                      <InfoItem label="Sexe" value={pet.gender === 'male' ? 'Mâle' : 'Femelle'} />
+                      {pet.coat_color && <InfoItem label="Couleur du pelage" value={pet.coat_color} />}
+                      {pet.eye_color && <InfoItem label="Couleur des yeux" value={pet.eye_color} />}
+                    </div>
+                  </div>
 
-                <div className="pt-6">
-                  <button className="w-full py-5 bg-[#6B4E9C] hover:bg-[#5a3d87] text-white text-xl font-bold rounded-xl flex items-center justify-center gap-3">
-                    <FontAwesomeIcon icon={faHeartRegular} /> Adopter {pet.name}
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#333] mb-4">Refuge</h3>
+                    <div className="p-5 bg-[#f9f9f9] rounded-2xl">
+                      <p className="font-medium text-[#333]">{pet.shelter.name}</p>
+                      <p className="text-[#666] text-sm">{pet.shelter.city}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#333] mb-4">À propos</h3>
+                    <p className="text-[#555] leading-relaxed text-base">
+                      {pet.description || 'Aucune description disponible pour le moment.'}
+                    </p>
+                  </div>
+
+                  {/* Bouton d'adoption */}
+                  <button className="w-full py-5 bg-gradient-to-r from-[#D29059] to-[#c57a45] hover:from-[#c57a45] hover:to-[#b86b3b] text-white text-xl font-bold rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3">
+                    <FontAwesomeIcon icon={faHeartRegular} className="text-2xl" />
+                    Je veux adopter {pet.name}
                   </button>
                 </div>
               </div>
@@ -127,5 +209,13 @@ const API_URL = `http://localhost:8000/api/pets/${id}`;
     </div>
   );
 };
+
+// Petit composant réutilisable pour les infos
+const InfoItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <div>
+    <p className="text-sm text-[#999] mb-1">{label}</p>
+    <p className="px-4 py-3 bg-[#f9f9f9] rounded-xl font-medium text-[#333]">{value}</p>
+  </div>
+);
 
 export default PetProfile;

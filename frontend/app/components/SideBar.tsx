@@ -61,9 +61,11 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen bg-[#D29059] flex flex-col transition-all duration-300 ease-in-out z-[100] overflow-x-hidden ${
-          isOpen ? 'w-52' : 'w-20'
-        }`}
+        className={`fixed left-0 top-0 h-screen bg-[#D29059] flex flex-col transition-all duration-300 ease-in-out z-[100] overflow-hidden
+          ${isOpen 
+            ? 'w-52 lg:w-52' 
+            : 'w-52 lg:w-20 -translate-x-full lg:translate-x-0'
+          }`}
       >
         {/* Header */}
         <div className="px-4 pt-6 pb-4">
