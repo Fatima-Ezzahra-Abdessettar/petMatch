@@ -4,6 +4,9 @@ use App\Http\Controllers\PetController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\AdoptionApplicationController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Api\PasswordResetController;
+use App\Http\Controllers\Api\EmailVerificationController;
+
 
 // ==========================================
 // PUBLIC ROUTES
@@ -13,9 +16,18 @@ Route::post('/register', [AuthController::class, 'register'])
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:10,1');
 Route::get('/pets', [PetController::class, 'index']);
-Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+
+// Public email verification route (no auth required)
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verifyPublic'])
+    ->middleware(['signed'])
     ->name('verification.verify');
-Route::post('/email/resend', [AuthController::class, 'resendVerificationEmail']);
+
+Route::post('/email/resend', [EmailVerificationController::class, 'resend']);
+
+// Password Reset Routes
+Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword']);
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
+Route::post('/verify-reset-token', [PasswordResetController::class, 'verifyToken']);
 
 // ==========================================
 // AUTHENTICATED ROUTES (Both users & admins)
@@ -25,7 +37,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::put('/me', [AuthController::class, 'updateProfile']);
     Route::post('/logout', [AuthController::class, 'logout']);
-    
+
     // View pet details (both roles can view)
     Route::get('/pets/{pet}', [PetController::class, 'show']);
 });
@@ -38,7 +50,7 @@ Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
     Route::get('/favorites', [FavoriteController::class, 'index']);
     Route::post('/pets/{pet}/favorites', [FavoriteController::class, 'store']);
     Route::delete('/pets/{pet}/favorites', [FavoriteController::class, 'destroy']);
-    
+
     // Adoption applications (users only)
     Route::get('/adoptions', [AdoptionApplicationController::class, 'mine']);
     Route::post('/pets/{pet}/apply', [AdoptionApplicationController::class, 'store']); // ← CHANGED
@@ -55,7 +67,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::put('/pets/{pet}', [PetController::class, 'update']);
     Route::delete('/pets/{pet}', [PetController::class, 'destroy']);
     Route::get('/pets/stats', [PetController::class, 'stats']);
-    
+
     // Adoption application management
     Route::get('/adoption-applications', [AdoptionApplicationController::class, 'forMyShelter']);
     Route::get('/adoption-applications/{adoptionApplication}', [AdoptionApplicationController::class, 'show']);
