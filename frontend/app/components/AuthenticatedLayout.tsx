@@ -14,14 +14,14 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
   };
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: '#F5F5F5' }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: '#F7F5EA' }}>
       <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       
       <div 
         className="flex-1 transition-all duration-300 overflow-y-auto relative"
         style={{ 
           marginLeft: isSidebarOpen ? '210px' : '70px',
-          backgroundColor: '#F5F5F5',
+          backgroundColor: '#F7F5EA',
           minHeight: '100vh'
         }}
       >

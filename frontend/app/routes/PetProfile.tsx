@@ -83,7 +83,7 @@ const PetProfile: React.FC = () => {
   // Loading
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-[#E5E5E5]">
+      <div className="flex min-h-screen bg-[#F7F5EA]">
         <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
         <div className="flex-1 flex flex-col">
           <TopNavBar />
@@ -121,7 +121,7 @@ const PetProfile: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#E5E5E5]">
+    <div className="flex min-h-screen bg-[#F7F5EA]">
       {/* Sidebar */}
       <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 

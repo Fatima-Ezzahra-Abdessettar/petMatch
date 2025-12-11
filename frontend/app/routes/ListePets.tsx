@@ -156,7 +156,7 @@ const PetsPage: React.FC = () => {
   // Loading & Error
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#E5E5E5] flex items-center justify-center p-5">
+      <div className="min-h-screen bg-[#F7F5EA] flex items-center justify-center p-5">
         <div className="text-center">
           <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#D29059" />
           <p className="mt-5 text-lg text-[#666]">Chargement des animaux...</p>
@@ -167,7 +167,7 @@ const PetsPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#E5E5E5] flex items-center justify-center p-5">
+      <div className="min-h-screen bg-[#F7F5EA] flex items-center justify-center p-5">
         <div className="text-center bg-white p-10 rounded-xl shadow-lg max-w-md">
           <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#ff6b6b" />
           <h3 className="mt-5 text-xl font-medium text-[#333]">Erreur</h3>
@@ -181,7 +181,7 @@ const PetsPage: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#E5E5E5]">
+    <div className="flex min-h-screen bg-[#F7F5EA]">
       {/* Sidebar */}
       <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 

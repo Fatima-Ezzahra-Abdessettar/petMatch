@@ -119,7 +119,7 @@ export default function Favorites() {
   if (isLoading) {
     return (
       <AuthenticatedLayout>
-        <div className="flex min-h-screen items-center justify-center bg-[#E5E5E5]">
+        <div className="flex min-h-screen items-center justify-center bg-[#F7F5EA]">
           <div className="h-16 w-16 animate-spin rounded-full border-t-4 border-b-4 border-[#D29059]" />
         </div>
       </AuthenticatedLayout>
@@ -128,7 +128,7 @@ export default function Favorites() {
 
   return (
     <AuthenticatedLayout>
-      <div className="min-h-screen bg-[#E5E5E5] py-8 px-4">
+      <div className="min-h-screen bg-[#F7F5EA] py-8 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Titre */}
           <h1 className="text-center text-4xl md:text-5xl font-bold text-[#333] mb-10">
