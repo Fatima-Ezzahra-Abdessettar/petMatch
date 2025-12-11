@@ -45,8 +45,8 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
       type: 'heroicon' 
     },
     { 
-      path: '/mes-demandes', 
-      label: 'Mes demandes', 
+      path: '/requests', 
+      label: 'Requests', 
       icon: ClipboardDocumentListIcon, 
       activeIcon: ClipboardDocumentListIconSolid, 
       type: 'heroicon' 
@@ -65,13 +65,7 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
       activeIcon: UserCircleIconSolid, 
       type: 'heroicon' 
     },
-    { 
-      path: '/settings', 
-      label: 'Settings', 
-      icon: Cog6ToothIcon, 
-      activeIcon: Cog6ToothIconSolid, 
-      type: 'heroicon' 
-    },
+    
     { 
       path: '/favorites', 
       label: 'Favorites', 

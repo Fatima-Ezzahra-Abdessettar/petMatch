@@ -2,7 +2,8 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import PetCard from '../components/petCard';
 import PetFilters from '../components/PetFilters';
-import Sidebar from '../components/SideBar'; 
+import Sidebar from '../components/SideBar';
+import TopNavBar from '~/components/TopNavBar'; // Import ajouté
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChevronLeft,
@@ -60,7 +61,6 @@ const PetsPage: React.FC = () => {
   const itemsPerPage = 8;
   const API_URL = 'http://127.0.0.1:8000/api/pets';
 
-  // État de la sidebar : isOpen + fonction toggle (exactement ce que Sidebar attend)
   const [isOpen, setIsOpen] = useState(true);
   const toggleSidebar = () => setIsOpen(prev => !prev);
 
@@ -71,7 +71,6 @@ const PetsPage: React.FC = () => {
       const response = await fetch(API_URL, {
         headers: { Accept: 'application/json' },
       });
-      if (!response.ok) throw new Error('No response');
       if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
       const data = await response.json();
       setPets(Array.isArray(data) ? data : []);
@@ -154,6 +153,7 @@ const PetsPage: React.FC = () => {
     shelter: pet.shelter,
   });
 
+  // Loading & Error
   if (loading) {
     return (
       <div className="min-h-screen bg-[#E5E5E5] flex items-center justify-center p-5">
@@ -182,101 +182,100 @@ const PetsPage: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-[#E5E5E5]">
-      {/* Sidebar corrigée */}
+      {/* Sidebar */}
       <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
-      {/* Main content - largeur adaptée à jour */}
-      <div
-        className={`flex-1 transition-all duration-300 ${
-          isOpen ? 'lg:ml-52' : 'lg:ml-0' // 52 × 4 = 208px (w-52 dans Sidebar)
-        }`}
-      >
-        <div className="p-4 md:p-6 lg:p-8">
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-            <div className="p-5 md:p-8 border-b border-gray-100">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <h2 className="text-2xl font-semibold text-[#333]">
-                  Pets list
-                  <span className="text-base font-normal text-[#666] ml-3">
-                    ({filteredPets.length})
-                  </span>
-                </h2>
+      {/* Contenu principal avec TopNavBar en haut */}
+      <div className="flex-1 flex flex-col">
+        {/* TopNavBar fixe en haut */}
+        <TopNavBar />
 
-                <PetFilters
-                  isFilterOpen={isFilterOpen}
-                  setIsFilterOpen={setIsFilterOpen}
-                  selectedFilters={selectedFilters}
-                  setSelectedFilters={setSelectedFilters}
-                  speciesOptions={speciesOptions}
-                  ageOptions={ageOptions}
-                  openSections={openSections}
-                  toggleSection={toggleSection}
-                />
-              </div>
-            </div>
+        {/* Contenu de la page (décalé sous la navbar) */}
+        <div className={`flex-1 transition-all duration-300 ${isOpen ? 'lg:ml-52' : 'lg:ml-0'}`}>
+          <div className="p-4 md:p-6 lg:p-8">
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-5 md:p-8 border-b border-gray-100">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <h2 className="text-2xl font-semibold text-[#333]">
+                    Pets list
+                    <span className="text-base font-normal text-[#666] ml-3">
+                      ({filteredPets.length})
+                    </span>
+                  </h2>
 
-            <div className="p-5 md:p-8">
-              {filteredPets.length > 0 ? (
-                <>
-                  {/* Grille responsive + adaptée à la sidebar */}
-                  <div
-                    className={`grid gap-6
-                      grid-cols-1
-                      sm:grid-cols-2
-                      md:grid-cols-3
-                      lg:grid-cols-3
-                      xl:grid-cols-4
-                      ${isOpen ? '2xl:grid-cols-3' : '2xl:grid-cols-4'}
-                    `}
-                  >
-                    {currentPets.map(pet => (
-                      <PetCard key={pet.id} props={adaptPetForCard(pet)} />
-                    ))}
-                  </div>
-
-                  {/* Pagination */}
-                  {totalPages > 1 && (
-                    <div className="mt-10 flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t">
-                      <div className="text-sm text-[#666]">
-                        {(currentPage - 1) * itemsPerPage + 1} -{' '}
-                        {Math.min(currentPage * itemsPerPage, filteredPets.length)} sur {filteredPets.length}
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                          disabled={currentPage === 1}
-                          className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-40 hover:bg-[#D29059] hover:text-white transition"
-                        >
-                          <FontAwesomeIcon icon={faChevronLeft} />
-                        </button>
-                        <span className="text-sm text-[#666] px-3">
-                          Page {currentPage} / {totalPages}
-                        </span>
-                        <button
-                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                          disabled={currentPage === totalPages}
-                          className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-40 hover:bg-[#D29059] hover:text-white transition"
-                        >
-                          <FontAwesomeIcon icon={faChevronRight} />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="text-center py-20">
-                  <p className="text-lg text-[#666] mb-6">
-                    Aucun animal trouvé avec ces filtres.
-                  </p>
-                  <button
-                    onClick={() => setSelectedFilters({ species: [], ageRange: [] })}
-                    className="px-6 py-3 bg-[#D29059] text-white rounded-lg hover:bg-[#c57a45]"
-                  >
-                    Effacer les filtres
-                  </button>
+                  <PetFilters
+                    isFilterOpen={isFilterOpen}
+                    setIsFilterOpen={setIsFilterOpen}
+                    selectedFilters={selectedFilters}
+                    setSelectedFilters={setSelectedFilters}
+                    speciesOptions={speciesOptions}
+                    ageOptions={ageOptions}
+                    openSections={openSections}
+                    toggleSection={toggleSection}
+                  />
                 </div>
-              )}
+              </div>
+
+              <div className="p-5 md:p-8">
+                {filteredPets.length > 0 ? (
+                  <>
+                    <div
+                      className={`grid gap-6
+                        grid-cols-1
+                        sm:grid-cols-2
+                        md:grid-cols-3
+                        lg:grid-cols-3
+                        xl:grid-cols-4
+                        ${isOpen ? '2xl:grid-cols-3' : '2xl:grid-cols-4'}
+                      `}
+                    >
+                      {currentPets.map(pet => (
+                        <PetCard key={pet.id} props={adaptPetForCard(pet)} />
+                      ))}
+                    </div>
+
+                    {totalPages > 1 && (
+                      <div className="mt-10 flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t">
+                        <div className="text-sm text-[#666]">
+                          {(currentPage - 1) * itemsPerPage + 1} -{' '}
+                          {Math.min(currentPage * itemsPerPage, filteredPets.length)} sur {filteredPets.length}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-40 hover:bg-[#D29059] hover:text-white transition"
+                          >
+                            <FontAwesomeIcon icon={faChevronLeft} />
+                          </button>
+                          <span className="text-sm text-[#666] px-3">
+                            Page {currentPage} / {totalPages}
+                          </span>
+                          <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-40 hover:bg-[#D29059] hover:text-white transition"
+                          >
+                            <FontAwesomeIcon icon={faChevronRight} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-20">
+                    <p className="text-lg text-[#666] mb-6">
+                      Aucun animal trouvé avec ces filtres.
+                    </p>
+                    <button
+                      onClick={() => setSelectedFilters({ species: [], ageRange: [] })}
+                      className="px-6 py-3 bg-[#D29059] text-white rounded-lg hover:bg-[#c57a45]"
+                    >
+                      Effacer les filtres
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
