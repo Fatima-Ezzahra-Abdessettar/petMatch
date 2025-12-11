@@ -116,11 +116,10 @@ export default function NavBar() {
           {/* Desktop Buttons */}
           <div>
             <Link to="/login">
-            <button className="bg-btnPrimary px-10 py-2 text-BgLight text-lg rounded-lg hover:bg-[#cb763a] hover:transition-colors active:bg-[#b26228] hover:cursor-pointer md:block hidden">
-              sign in
-            </button>
+              <button className="bg-btnPrimary px-10 py-2 text-BgLight text-lg rounded-lg hover:bg-[#cb763a] hover:transition-colors active:bg-[#b26228] hover:cursor-pointer md:block hidden">
+                sign in
+              </button>
             </Link>
-            
           </div>
           <button
             onClick={toggleTheme}
@@ -185,7 +184,11 @@ export default function NavBar() {
               }}
             >
               <img
-                src="public/pet-MattchBlack.PNG"
+                src={
+              isDarkMode
+                ? "public/pet-MattchWhite.PNG"
+                : "public/pet-MattchBlack.PNG"
+            }
                 alt="petMatch"
                 className="w-16"
               />
@@ -227,8 +230,8 @@ export default function NavBar() {
                 >
                   about
                 </Link>
-                <a
-                  href="#laterWillBeAdded"
+                <Link
+                  to={"/#reviews"}
                   onClick={closeMobileMenu}
                   className="py-2 px-3 rounded-lg transition-colors"
                   style={{
@@ -243,8 +246,8 @@ export default function NavBar() {
                     (e.currentTarget.style.backgroundColor = "transparent")
                   }
                 >
-                  laterWillBeAdded
-                </a>
+                  reviews
+                </Link>
                 <Link
                   to={"/our-pets"}
                   onClick={closeMobileMenu}
@@ -263,24 +266,6 @@ export default function NavBar() {
                 >
                   our pets
                 </Link>
-                <a
-                  href="#reviews"
-                  onClick={closeMobileMenu}
-                  className="py-2 px-3 rounded-lg transition-colors"
-                  style={{
-                    color: isDarkMode ? "#F7F5EA" : "#36332E",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.backgroundColor = isDarkMode
-                      ? "rgba(247, 245, 234, 0.1)"
-                      : "rgba(0, 0, 0, 0.05)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.backgroundColor = "transparent")
-                  }
-                >
-                  reviews
-                </a>
                 <Link
                   to={"/contact"}
                   onClick={closeMobileMenu}
@@ -313,9 +298,9 @@ export default function NavBar() {
               {/* sign in button */}
               <div className="flex justify-center">
                 <Link to="/login">
-                <button className="bg-btnPrimary px-10 py-2 text-BgLight text-lg rounded-lg hover:bg-[#cb763a] hover:transition-colors active:bg-[#b26228] hover:cursor-pointer">
-                  sign in
-                </button>
+                  <button className="bg-btnPrimary px-10 py-2 text-BgLight text-lg rounded-lg hover:bg-[#cb763a] hover:transition-colors active:bg-[#b26228] hover:cursor-pointer">
+                    sign in
+                  </button>
                 </Link>
               </div>
             </div>
