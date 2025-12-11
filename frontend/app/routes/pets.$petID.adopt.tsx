@@ -7,7 +7,7 @@ export default function PetAdoptionPage() {
   const navigate = useNavigate();
   
   // Get petId from params
-  const petId = params.petId;
+  const petId = params.id;
 
   // Debug log
   useEffect(() => {

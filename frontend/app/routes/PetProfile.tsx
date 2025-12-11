@@ -11,6 +11,7 @@ import {
 import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '../components/SideBar'; 
 import { UserContext } from '~/contexts/UserContext';
+import { Link } from 'react-router-dom';
 
 interface Pet {
   id: number;
@@ -196,10 +197,15 @@ const PetProfile: React.FC = () => {
                   </div>
 
                   {/* Bouton d'adoption */}
-                  <button className="w-full py-5 bg-gradient-to-r from-[#D29059] to-[#c57a45] hover:from-[#c57a45] hover:to-[#b86b3b] text-white text-xl font-bold rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3">
-                    <FontAwesomeIcon icon={faHeartRegular} className="text-2xl" />
-                    Je veux adopter {pet.name}
-                  </button>
+                  <Link
+                    to={`/pet/${pet.id}/adopt`}
+                    className="block w-full"
+                  >
+                    <button style={{cursor: 'pointer'}} className="w-full py-5 bg-gradient-to-r from-[#D29059] to-[#c57a45] hover:from-[#c57a45] hover:to-[#b86b3b] text-white text-xl font-bold rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3">
+                      <FontAwesomeIcon icon={faHeartRegular} className="text-2xl" />
+                      Je veux adopter {pet.name}
+                    </button>
+                  </Link>
                 </div>
               </div>
             </div>

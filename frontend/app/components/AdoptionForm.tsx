@@ -312,8 +312,8 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
                 disabled={currentStep < idx + 1}
                 className="px-4 py-2 rounded-full text-sm font-medium transition-colors"
                 style={{
-                  backgroundColor: currentStep === idx + 1 ? '#7c3aed' : currentStep > idx + 1 ? (isDarkMode ? '#5b21b6' : '#ede9fe') : (isDarkMode ? '#374151' : '#f3f4f6'),
-                  color: currentStep === idx + 1 ? 'white' : currentStep > idx + 1 ? (isDarkMode ? '#e9d5ff' : '#7c3aed') : (isDarkMode ? '#6b7280' : '#9ca3af'),
+                  backgroundColor: currentStep === idx + 1 ? '#7c3aed' : currentStep > idx + 1 ? (isDarkMode ? '#5b21b6' : '#ede9fe') : (isDarkMode ? '#473751ff' : '#f5f3f6ff'),
+                  color: currentStep === idx + 1 ? 'white' : currentStep > idx + 1 ? (isDarkMode ? '#e9d5ff' : '#7c3aed') : (isDarkMode ? '#746b80ff' : '#a69cafff'),
                   cursor: currentStep > idx + 1 ? 'pointer' : currentStep === idx + 1 ? 'default' : 'not-allowed'
                 }}>
                 {tab.label}

@@ -6,7 +6,7 @@ export default [
     route("/contact","routes/Contact.tsx"),
     route("/pets-list","routes/ListePets.tsx"),
     route("/pet/:id", "routes/PetProfile.tsx"),
-    route("/pets/:Id/adopt", "routes/pets.$petID.adopt.tsx"),
+    route("/pet/:id/adopt", "routes/pets.$petID.adopt.tsx"),
 
     route("/profile","routes/Profile.tsx"),
     route("/favorites", "routes/Favorites.tsx"),
