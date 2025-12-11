@@ -1,7 +1,7 @@
 import axios from "axios";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import PetCard from "~/components/petCard";
+import PetCard from "~/components/petCard1";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import api from "~/api/client";

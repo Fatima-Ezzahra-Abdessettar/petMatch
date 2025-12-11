@@ -72,7 +72,7 @@ export default function Login() {
 
     try {
       await login(formData.email, formData.password);
-      navigate("/");
+      navigate("/welcome-user");
     } catch (err: any) {
       const errorMessage = err.message || "Login failed";
       
