@@ -40,6 +40,16 @@ export interface LoginData {
   email: string;
   password: string;
 }
+export interface ForgotPasswordData {
+  email: string;
+}
+
+export interface ResetPasswordData {
+  email: string;
+  token: string;
+  password: string;
+  password_confirmation: string;
+}
 
 class AuthService {
   // Store token in localStorage
@@ -243,6 +253,70 @@ class AuthService {
       throw error;
     }
   }
+
+
+// Add these methods to the AuthService class
+async forgotPassword(data: ForgotPasswordData): Promise<{ message: string }> {
+  try {
+    console.log("Requesting password reset:", `${API_URL}/forgot-password`);
+
+    const response = await fetch(`${API_URL}/forgot-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    console.log("Response status:", response.status);
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Failed to send reset link");
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    if (error instanceof TypeError && error.message === "Failed to fetch") {
+      throw new Error("Cannot connect to server.");
+    }
+    throw error;
+  }
+}
+
+async resetPassword(data: ResetPasswordData): Promise<{ message: string }> {
+  try {
+    console.log("Resetting password:", `${API_URL}/reset-password`);
+
+    const response = await fetch(`${API_URL}/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    console.log("Response status:", response.status);
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.message || "Failed to reset password");
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Reset password error:", error);
+    if (error instanceof TypeError && error.message === "Failed to fetch") {
+      throw new Error("Cannot connect to server.");
+    }
+    throw error;
+  }
+}
 }
 
 export const authService = new AuthService();

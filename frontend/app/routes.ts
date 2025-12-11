@@ -12,6 +12,8 @@ export default [
     route("/welcome-user", "routes/WelcomeUser.tsx"),
     route("/login","routes/Login.tsx"),      // lowercase
     route("/register","routes/Register.tsx"),  // lowercase
-    route("/error","routes/Error.tsx")
+    route("/error","routes/Error.tsx"),
+    route("/forgot-password","routes/forgot-password.tsx"),
+    route("/reset-password","routes/Reset-password.tsx"),
   ] satisfies RouteConfig;
 

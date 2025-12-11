@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   HomeIcon,
@@ -19,6 +19,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDog } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../contexts/auth';
+import { UserContext } from '../contexts/UserContext';
 
 interface SideBarProps {
   isOpen: boolean;
@@ -26,7 +27,8 @@ interface SideBarProps {
 }
 
 const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const userContext = useContext(UserContext);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -35,20 +37,59 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
   };
 
   const menuItems = [
-    { path: '/welcome-user', label: 'home', icon: HomeIcon, activeIcon: HomeIconSolid, type: 'heroicon' },
-    { path: '/mes-demandes', label: 'Mes demandes', icon: ClipboardDocumentListIcon, activeIcon: ClipboardDocumentListIconSolid, type: 'heroicon' },
-    { path: '/pets-list', label: 'Pets', icon: faDog, activeIcon: faDog, type: 'fontawesome' },
-    { path: '/profile', label: 'profile', icon: UserCircleIcon, activeIcon: UserCircleIconSolid, type: 'heroicon' },
-    { path: '/settings', label: 'Settings', icon: Cog6ToothIcon, activeIcon: Cog6ToothIconSolid, type: 'heroicon' },
-    { path: '/favorites', label: 'Favorites', icon: HeartIcon, activeIcon: HeartIconSolid, type: 'heroicon' },
+    { 
+      path: '/welcome-user', 
+      label: 'home', 
+      icon: HomeIcon, 
+      activeIcon: HomeIconSolid, 
+      type: 'heroicon' 
+    },
+    { 
+      path: '/mes-demandes', 
+      label: 'Mes demandes', 
+      icon: ClipboardDocumentListIcon, 
+      activeIcon: ClipboardDocumentListIconSolid, 
+      type: 'heroicon' 
+    },
+    { 
+      path: '/pets-list', 
+      label: 'Pets', 
+      icon: faDog, 
+      activeIcon: faDog, 
+      type: 'fontawesome' 
+    },
+    { 
+      path: '/profile', 
+      label: 'profile', 
+      icon: UserCircleIcon, 
+      activeIcon: UserCircleIconSolid, 
+      type: 'heroicon' 
+    },
+    { 
+      path: '/settings', 
+      label: 'Settings', 
+      icon: Cog6ToothIcon, 
+      activeIcon: Cog6ToothIconSolid, 
+      type: 'heroicon' 
+    },
+    { 
+      path: '/favorites', 
+      label: 'Favorites', 
+      icon: HeartIcon, 
+      activeIcon: HeartIconSolid, 
+      type: 'heroicon' 
+    },
   ];
 
-  const userName = user?.name || 'User';
-  const userEmail = user?.email || 'user@email.com';
+  // Get user info from UserContext (with fallback)
+  const contextUser = userContext?.user;
+  const userName = contextUser?.name || 'User';
+  const userEmail = contextUser?.email || 'user@email.com';
+  const userAvatar = contextUser?.avatar;
 
   return (
     <>
-      {/* Bouton burger quand sidebar fermée */}
+      {/* Menu burger button when sidebar is closed */}
       {!isOpen && (
         <button
           onClick={toggleSidebar}
@@ -70,10 +111,18 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
         {/* Header */}
         <div className="px-4 pt-6 pb-4">
           <div className="flex items-center gap-3">
-            <button onClick={toggleSidebar} className="text-[#FEF3DD] hover:bg-white/10 p-2 rounded-lg transition">
+            <button 
+              onClick={toggleSidebar} 
+              className="text-[#FEF3DD] hover:bg-white/10 p-2 rounded-lg transition"
+              aria-label="Toggle menu"
+            >
               <Bars3Icon className="w-6 h-6" />
             </button>
-            {isOpen && <span className="text-[#FEF3DD] text-xs font-semibold tracking-widest uppercase">Menu</span>}
+            {isOpen && (
+              <span className="text-[#FEF3DD] text-xs font-semibold tracking-widest uppercase">
+                Menu
+              </span>
+            )}
           </div>
         </div>
 
@@ -93,47 +142,70 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
                   }
                   title={!isOpen ? item.label : ''}
                 >
-                  {({ isActive }) => (
-                    <>
-                      {item.type === 'fontawesome' ? (
-                        <FontAwesomeIcon
-                          icon={item.icon as any}
-                          className={`w-5 h-5 ${isActive ? 'text-[#D29059]' : 'text-[#FEF3DD]'}`}
-                        />
-                      ) : (
+                  {({ isActive }) => {
+                    if (item.type === 'fontawesome') {
+                      return (
                         <>
-                          {isActive ? (
-                            <item.activeIcon className="w-5 h-5 text-[#D29059]" />
-                          ) : (
-                            <item.icon className="w-5 h-5 text-[#FEF3DD]" />
+                          <FontAwesomeIcon
+                            icon={item.icon as any}
+                            className={`w-5 h-5 ${isActive ? 'text-[#D29059]' : 'text-[#FEF3DD]'}`}
+                          />
+                          {isOpen && (
+                            <span className="text-sm font-medium capitalize">
+                              {item.label}
+                            </span>
                           )}
                         </>
-                      )}
-                      {isOpen && <span className="text-sm font-medium capitalize">{item.label}</span>}
-                    </>
-                  )}
+                      );
+                    } else {
+                      const Icon = (isActive ? item.activeIcon : item.icon) as React.ComponentType<{ className?: string }>;
+                      return (
+                        <>
+                          <Icon className={`w-5 h-5 ${isActive ? 'text-[#D29059]' : 'text-[#FEF3DD]'}`} />
+                          {isOpen && (
+                            <span className="text-sm font-medium capitalize">
+                              {item.label}
+                            </span>
+                          )}
+                        </>
+                      );
+                    }
+                  }}
                 </NavLink>
               </li>
             ))}
           </ul>
         </nav>
 
-        {/* Footer utilisateur */}
+        {/* User footer */}
         <div className="p-4 border-t border-white/20">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#F3F0E8]/95 rounded-full flex items-center justify-center flex-shrink-0">
-              <UserCircleIcon className="w-8 h-8 text-[#D29059]" />
+            <div className="w-10 h-10 bg-[#F3F0E8]/95 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
+              {userAvatar ? (
+                <img 
+                  src={userAvatar} 
+                  alt="User avatar" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <UserCircleIcon className="w-8 h-8 text-[#D29059]" />
+              )}
             </div>
             {isOpen && (
               <>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[#FEF3DD] font-semibold text-sm truncate">{userName}</p>
-                  <p className="text-[#FEF3DD]/80 text-xs truncate">{userEmail}</p>
+                  <p className="text-[#FEF3DD] font-semibold text-sm truncate">
+                    {userName}
+                  </p>
+                  <p className="text-[#FEF3DD]/80 text-xs truncate">
+                    {userEmail}
+                  </p>
                 </div>
                 <button
                   onClick={handleLogout}
                   className="text-red-500 hover:scale-110 transition-transform p-2"
                   aria-label="Déconnexion"
+                  title="Logout"
                 >
                   <ArrowRightOnRectangleIcon className="w-5 h-5" />
                 </button>

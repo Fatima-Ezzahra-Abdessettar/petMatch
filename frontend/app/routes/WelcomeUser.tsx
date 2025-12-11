@@ -40,7 +40,7 @@ export default function WelcomeUser() {
             <p className="text-xl md:text-2xl font-raleway text-white mb-8">
               ready to meet you new companion ?
             </p>
-            <Link to="/our-pets">
+            <Link to="/pets-list">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

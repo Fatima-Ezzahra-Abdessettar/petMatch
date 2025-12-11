@@ -1,14 +1,19 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import api from '~/api/client';
+
+interface PasswordFormData {
+    password: string;
+    password_confirmation: string;
+}
 
 const PasswordChangeForm: React.FC = () => {
-    const { register, handleSubmit, reset, watch } = useForm();
+    const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<PasswordFormData>();
     const password = watch('password');
 
-    const onSubmit = async (data: any) => {
+    const onSubmit = async (data: PasswordFormData) => {
         if (data.password !== data.password_confirmation) {
             toast.error('Passwords do not match', {
                 position: 'top-right',
@@ -16,8 +21,9 @@ const PasswordChangeForm: React.FC = () => {
             });
             return;
         }
+
         try {
-            await axios.put('/api/me', {
+            await api.put('/api/me', {
                 password: data.password,
                 password_confirmation: data.password_confirmation,
             });
@@ -28,10 +34,22 @@ const PasswordChangeForm: React.FC = () => {
             });
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || 'Error changing password';
-            toast.error(errorMessage, {
-                position: 'top-right',
-                autoClose: 5000,
-            });
+            const errors = error.response?.data?.errors;
+            
+            if (errors) {
+                // Display validation errors
+                Object.values(errors).flat().forEach((err: any) => {
+                    toast.error(err, {
+                        position: 'top-right',
+                        autoClose: 5000,
+                    });
+                });
+            } else {
+                toast.error(errorMessage, {
+                    position: 'top-right',
+                    autoClose: 5000,
+                });
+            }
         }
     };
 
@@ -45,9 +63,20 @@ const PasswordChangeForm: React.FC = () => {
                     </label>
                     <input 
                         type="password" 
-                        {...register('password')} 
-                        className="border border-gray-300 p-2 w-full rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
+                        {...register('password', {
+                            required: 'Password is required',
+                            minLength: {
+                                value: 6,
+                                message: 'Password must be at least 6 characters'
+                            }
+                        })} 
+                        className={`border p-2 w-full rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                            errors.password ? 'border-red-500' : 'border-gray-300'
+                        }`}
                     />
+                    {errors.password && (
+                        <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
+                    )}
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -55,9 +84,16 @@ const PasswordChangeForm: React.FC = () => {
                     </label>
                     <input 
                         type="password" 
-                        {...register('password_confirmation')} 
-                        className="border border-gray-300 p-2 w-full rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent" 
+                        {...register('password_confirmation', {
+                            required: 'Please confirm your password'
+                        })} 
+                        className={`border p-2 w-full rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                            errors.password_confirmation ? 'border-red-500' : 'border-gray-300'
+                        }`}
                     />
+                    {errors.password_confirmation && (
+                        <p className="text-red-500 text-xs mt-1">{errors.password_confirmation.message}</p>
+                    )}
                 </div>
             </div>
             <div className="flex justify-end mt-4">
