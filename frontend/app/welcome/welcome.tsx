@@ -352,7 +352,7 @@ const [reviewTouchStart, setReviewTouchStart] = useState<number | null>(null);
           </div>
         </div>
       </section>
-      // Our Pets Section
+     
 <section className=" duration-300 w-full sm:py-2 lg:py-3">
   <div className="container mx-auto px-4 sm:px-6">
     <div className="max-w-7xl mx-auto">
