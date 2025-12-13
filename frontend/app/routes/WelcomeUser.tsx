@@ -10,7 +10,7 @@ export default function WelcomeUser() {
   return (
     <AuthenticatedLayout>
       <div 
-        className="relative min-h-screen flex items-center justify-center overflow-hidden"
+        className="relative w-full h-screen flex items-center justify-center overflow-hidden"
         style={{
           backgroundImage: 'url(/catDog.png)',
           backgroundSize: 'cover',
