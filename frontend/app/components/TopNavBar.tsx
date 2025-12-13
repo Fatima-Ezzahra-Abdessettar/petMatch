@@ -78,16 +78,6 @@ const TopNavBar: React.FC<TopNavBarProps> = ({ onProfileClick, onMenuClick }) =>
               <UserCircleIcon className="w-5 h-5 text-gray-600" />
               <span>My Profile</span>
             </button>
-            <button
-              onClick={() => {
-                navigate('/settings');
-                setShowProfileMenu(false);
-              }}
-              className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
-            >
-              <Cog6ToothIcon className="w-5 h-5 text-gray-600" />
-              <span>Settings</span>
-            </button>
             <div className="border-t border-gray-100 my-1"></div>
             <button
               onClick={handleLogout}
