@@ -29,7 +29,7 @@ export default function PetAdoptionPage() {
       onSuccess={() => {
         console.log("✅ Adoption form submitted successfully!");
         // Redirect after successful submission
-        navigate('/pets');
+        navigate('/mes-demandes');
       }} 
     />
   );

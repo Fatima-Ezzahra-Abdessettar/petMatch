@@ -7,6 +7,7 @@ export default [
     route("/pets-list","routes/ListePets.tsx"),
     route("/pet/:id", "routes/PetProfile.tsx"),
     route("/pet/:id/adopt", "routes/pets.$petID.adopt.tsx"),
+    route("/mes-demandes", "routes/MesDemandes.tsx"),
 
     route("/profile","routes/Profile.tsx"),
     route("/favorites", "routes/Favorites.tsx"),
