@@ -14,19 +14,18 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
   };
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: '#F5F5F5' }}>
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: '#F7F5EA' }}>
       <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       
       <div 
-        className="flex-1 transition-all duration-300 overflow-y-auto relative"
+        className="flex-1 flex flex-col transition-all duration-300 overflow-hidden relative"
         style={{ 
           marginLeft: isSidebarOpen ? '210px' : '70px',
-          backgroundColor: '#F5F5F5',
-          minHeight: '100vh'
+          backgroundColor: '#F7F5EA',
         }}
       >
         <TopNavBar onMenuClick={toggleSidebar} />
-        <div className="pt-16">
+        <div className="flex-1 overflow-y-auto">
           {children}
         </div>
       </div>
@@ -35,4 +34,3 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
 };
 
 export default AuthenticatedLayout;
-

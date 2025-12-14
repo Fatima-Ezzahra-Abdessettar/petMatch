@@ -54,10 +54,22 @@ function AppContent() {
   const publicRoutes = ['/', '/our-pets', '/contact', '/login', '/register', '/error'];
   const isPublicRoute = publicRoutes.includes(location.pathname);
   
+  // Check if it's the welcome/user page
+  const isWelcomeUserPage = location.pathname === '/welcome-user'; // adjust to your actual route
+  
+  // Build className conditionally
+  const containerClassName = isWelcomeUserPage 
+    ? 'flex flex-col' 
+    : 'min-h-screen bg-BgLight flex flex-col pt-16';
+  
+  const contentClassName = isWelcomeUserPage 
+    ? '' 
+    : `${isPublicRoute ? 'mt-15 pt-5' : ''} flex-grow container mx-auto px-4`;
+  
   return (
-    <div className="min-h-screen bg-BgLight flex flex-col pt-16 ">
+    <div className={containerClassName}>
       {isPublicRoute && <NavBar/>}
-      <div className={`${isPublicRoute ? 'mt-15 pt-5' : ''} flex-grow container mx-auto px-4`}>
+      <div className={contentClassName}>
         <Outlet />
       </div>
     </div>

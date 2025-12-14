@@ -1,4 +1,5 @@
 export interface Pet {
+  shelter: any;
   id: number;
   name: string;
   species: string | null;

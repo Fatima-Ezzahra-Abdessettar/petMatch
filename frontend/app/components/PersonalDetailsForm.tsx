@@ -128,7 +128,18 @@ const PersonalDetailsForm = forwardRef<PersonalDetailsFormHandle, PersonalDetail
     return (
         <>
             <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-6">Personal Details</h2>
+                {/* Header with Title and Save Button */}
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-semibold text-gray-800">Personal Details</h2>
+                    <button
+                        type="button"
+                        onClick={() => handleSubmit(onSubmit)()}
+                        disabled={isLoading}
+                        className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isLoading ? 'Saving...' : 'Save Changes'}
+                    </button>
+                </div>
                 
                 {/* Avatar Section */}
                 <div className="mb-6">

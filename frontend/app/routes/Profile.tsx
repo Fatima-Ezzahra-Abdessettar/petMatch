@@ -50,15 +50,6 @@ const Profile: React.FC = () => {
 
     return (
         <AuthenticatedLayout>
-            {/* Header */}
-            <div className="flex justify-end items-center p-6 gap-4">
-                <button 
-                    onClick={() => personalDetailsFormRef.current?.submit()}
-                    className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors font-medium"
-                >
-                    Save Changes
-                </button>
-            </div>
 
             {/* Main Content */}
             <div className="px-8 pb-8">

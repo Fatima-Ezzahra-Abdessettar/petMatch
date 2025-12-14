@@ -9,7 +9,8 @@ import {
   faExclamationTriangle,
 } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
-import Sidebar from '../components/SideBar'; 
+import Sidebar from '../components/SideBar';
+import TopNavBar from '~/components/TopNavBar'; // AJOUTÉ ICI
 import { UserContext } from '~/contexts/UserContext';
 import { Link } from 'react-router-dom';
 
@@ -40,7 +41,7 @@ const PetProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // État de la sidebar (partagé avec listepets)
+  // Sidebar state
   const [isOpen, setIsOpen] = useState(true);
   const toggleSidebar = () => setIsOpen(prev => !prev);
 
@@ -83,10 +84,13 @@ const PetProfile: React.FC = () => {
   // Loading
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-[#E5E5E5]">
+      <div className="flex min-h-screen bg-[#F7F5EA]">
         <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
-        <div className={`flex-1 flex items-center justify-center transition-all duration-300 ${isOpen ? 'lg:ml-52' : 'lg:ml-20'}`}>
-          <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#D29059" />
+        <div className="flex-1 flex flex-col">
+          <TopNavBar />
+          <div className="flex-1 flex items-center justify-center">
+            <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#D29059" />
+          </div>
         </div>
       </div>
     );
@@ -97,17 +101,20 @@ const PetProfile: React.FC = () => {
     return (
       <div className="flex min-h-screen bg-[#E5E5E5]">
         <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
-        <div className={`flex-1 flex items-center justify-center p-5 transition-all duration-300 ${isOpen ? 'lg:ml-52' : 'lg:ml-20'}`}>
-          <div className="text-center bg-white p-10 rounded-2xl shadow-xl max-w-md">
-            <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#ff6b6b" className="mb-4" />
-            <h3 className="text-2xl font-bold text-[#333] mb-3">Animal non trouvé</h3>
-            <p className="text-[#666] mb-6">{error || "Cet animal n'existe pas ou a été supprimé."}</p>
-            <button
-              onClick={() => navigate(-1)}
-              className="px-8 py-3 bg-[#D29059] text-white rounded-xl hover:bg-[#c57a45] transition"
-            >
-              Retour
-            </button>
+        <div className="flex-1 flex flex-col">
+          <TopNavBar />
+          <div className="flex-1 flex items-center justify-center p-5">
+            <div className="text-center bg-white p-10 rounded-2xl shadow-xl max-w-md">
+              <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#ff6b6b" className="mb-4" />
+              <h3 className="text-2xl font-bold text-[#333] mb-3">Animal non trouvé</h3>
+              <p className="text-[#666] mb-6">{error || "Cet animal n'existe pas ou a été supprimé."}</p>
+              <button
+                onClick={() => navigate(-1)}
+                className="px-8 py-3 bg-[#D29059] text-white rounded-xl hover:bg-[#c57a45] transition"
+              >
+                Retour
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -115,86 +122,91 @@ const PetProfile: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-[#E5E5E5]">
+    <div className="flex min-h-screen bg-[#F7F5EA]">
       {/* Sidebar */}
       <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
-      {/* Contenu principal */}
-      <div className={`transition-all duration-300 ${isOpen ? 'lg:ml-52' : 'lg:ml-0'}`}>
-        <div className="p-5 md:p-8 lg:p-10 max-w-7xl mx-auto">
-          {/* Bouton retour */}
-          <button
-            onClick={() => navigate(-1)}
-            className="mb-8 flex items-center gap-3 text-[#666] hover:text-[#D29059] text-lg font-medium transition-colors"
-          >
-            <FontAwesomeIcon icon={faArrowLeft} />
-            Retour à la liste
-          </button>
+      {/* Contenu principal avec TopNavBar en haut */}
+      <div className="flex-1 flex flex-col">
+        {/* TopNavBar fixée en haut */}
+        <TopNavBar />
 
-          {/* Carte principale */}
-          <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
-            <div className="p-6 md:p-10 lg:p-12">
-              {/* En-tête */}
-              <div className="flex flex-col sm:flex-row justify-between items-start gap-6 mb-10">
-                <div>
-                  <h1 className="text-4xl md:text-5xl font-bold text-[#333]">{pet.name}</h1>
-                  <p className="text-xl text-[#666] mt-2">
-                    {pet.gender === 'male' ? 'Mâle' : 'Femelle'} • {pet.age} an{pet.age > 1 ? 's' : ''}
-                  </p>
-                </div>
-                <button
-                  onClick={handleToggleFavorite}
-                  className="p-4 rounded-2xl bg-[#f9f9f9] hover:bg-[#FEF3DD] hover:scale-110 transition-all"
-                  aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-                >
-                  <FontAwesomeIcon
-                    icon={isFavorite ? faHeartSolid : faHeartRegular}
-                    className={`text-4xl ${isFavorite ? 'text-red-500' : 'text-gray-400'}`}
-                  />
-                </button>
-              </div>
+        {/* Contenu réel de la page */}
+        <div className={`flex-1 transition-all duration-300 ${isOpen ? 'lg:ml-52' : 'lg:ml-0'}`}>
+          <div className="p-5 md:p-8 lg:p-10 max-w-7xl mx-auto">
+            {/* Bouton retour */}
+            <button
+              onClick={() => navigate(-1)}
+              className="mb-8 flex items-center gap-3 text-[#666] hover:text-[#D29059] text-lg font-medium transition-colors"
+            >
+              <FontAwesomeIcon icon={faArrowLeft} />
+              Retour à la liste
+            </button>
 
-              {/* Grille responsive : photo + infos */}
-              <div className="grid lg:grid-cols-2 gap-10 xl:gap-16">
-                {/* Photo */}
-                <div className="relative group">
-                  <div className="rounded-3xl overflow-hidden shadow-2xl">
-                    <img
-                      src={pet.profile_picture || '/placeholder-pet.jpg'}
-                      alt={pet.name}
-                      className="w-full h-96 md:h-[500px] lg:h-[600px] object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                </div>
-
-                {/* Infos */}
-                <div className="space-y-8">
+            {/* Carte principale */}
+            <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+              <div className="p-6 md:p-10 lg:p-12">
+                {/* En-tête */}
+                <div className="flex flex-col sm:flex-row justify-between items-start gap-6 mb-10">
                   <div>
-                    <h3 className="text-lg font-semibold text-[#333] mb-4">Informations</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                      <InfoItem label="Espèce" value={pet.species === 'dog' ? 'Chien' : pet.species === 'cat' ? 'Chat' : pet.species} />
-                      <InfoItem label="Race" value={pet.type || 'Non spécifiée'} />
-                      <InfoItem label="Âge" value={`${pet.age} an${pet.age > 1 ? 's' : ''}`} />
-                      <InfoItem label="Sexe" value={pet.gender === 'male' ? 'Mâle' : 'Femelle'} />
-                      {pet.coat_color && <InfoItem label="Couleur du pelage" value={pet.coat_color} />}
-                      {pet.eye_color && <InfoItem label="Couleur des yeux" value={pet.eye_color} />}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#333] mb-4">Refuge</h3>
-                    <div className="p-5 bg-[#f9f9f9] rounded-2xl">
-                      <p className="font-medium text-[#333]">{pet.shelter.name}</p>
-                      <p className="text-[#666] text-sm">{pet.shelter.city}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#333] mb-4">À propos</h3>
-                    <p className="text-[#555] leading-relaxed text-base">
-                      {pet.description || 'Aucune description disponible pour le moment.'}
+                    <h1 className="text-4xl md:text-5xl font-bold text-[#333]">{pet.name}</h1>
+                    <p className="text-xl text-[#666] mt-2">
+                      {pet.gender === 'male' ? 'Mâle' : 'Femelle'} • {pet.age} an{pet.age > 1 ? 's' : ''}
                     </p>
                   </div>
+                  <button
+                    onClick={handleToggleFavorite}
+                    className="p-4 rounded-2xl bg-[#f9f9f9] hover:bg-[#FEF3DD] hover:scale-110 transition-all"
+                    aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                  >
+                    <FontAwesomeIcon
+                      icon={isFavorite ? faHeartSolid : faHeartRegular}
+                      className={`text-4xl ${isFavorite ? 'text-red-500' : 'text-gray-400'}`}
+                    />
+                  </button>
+                </div>
+
+                {/* Grille photo + infos */}
+                <div className="grid lg:grid-cols-2 gap-10 xl:gap-16">
+                  {/* Photo */}
+                  <div className="relative group">
+                    <div className="rounded-3xl overflow-hidden shadow-2xl">
+                      <img
+                        src={pet.profile_picture || '/placeholder-pet.jpg'}
+                        alt={pet.name}
+                        className="w-full h-96 md:h-[500px] lg:h-[600px] object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Infos */}
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#333] mb-4">Informations</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <InfoItem label="Espèce" value={pet.species === 'dog' ? 'Chien' : pet.species === 'cat' ? 'Chat' : pet.species} />
+                        <InfoItem label="Race" value={pet.type || 'Non spécifiée'} />
+                        <InfoItem label="Âge" value={`${pet.age} an${pet.age > 1 ? 's' : ''}`} />
+                        <InfoItem label="Sexe" value={pet.gender === 'male' ? 'Mâle' : 'Femelle'} />
+                        {pet.coat_color && <InfoItem label="Couleur du pelage" value={pet.coat_color} />}
+                        {pet.eye_color && <InfoItem label="Couleur des yeux" value={pet.eye_color} />}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#333] mb-4">Refuge</h3>
+                      <div className="p-5 bg-[#f9f9f9] rounded-2xl">
+                        <p className="font-medium text-[#333]">{pet.shelter.name}</p>
+                        <p className="text-[#666] text-sm">{pet.shelter.city}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-semibold text-[#333] mb-4">À propos</h3>
+                      <p className="text-[#555] leading-relaxed text-base">
+                        {pet.description || 'Aucune description disponible pour le moment.'}
+                      </p>
+                    </div>
 
                   {/* Bouton d'adoption */}
                   <Link
@@ -206,6 +218,7 @@ const PetProfile: React.FC = () => {
                       Je veux adopter {pet.name}
                     </button>
                   </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -216,7 +229,6 @@ const PetProfile: React.FC = () => {
   );
 };
 
-// Petit composant réutilisable pour les infos
 const InfoItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
   <div>
     <p className="text-sm text-[#999] mb-1">{label}</p>

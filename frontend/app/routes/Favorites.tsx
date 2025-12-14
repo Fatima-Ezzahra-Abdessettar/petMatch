@@ -1,5 +1,5 @@
 // frontend/app/routes/Favorites.tsx
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import PetCard from '../components/petCard';
 import PetFilters from '../components/PetFilters';
@@ -8,37 +8,49 @@ import { FiHeart, FiSearch } from 'react-icons/fi';
 import type { Pet } from '../types';
 import AuthenticatedLayout from '../components/AuthenticatedLayout';
 
-interface FilterState {
-  species: string[];
-  ageRange: string[];
-}
-
 export default function Favorites() {
   const { favorites, fetchFavorites, toggleFavorite } = useContext(UserContext)!;
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  
-  // PetFilters state
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState<FilterState>({
+  const [selectedFilters, setSelectedFilters] = useState<{
+    species: string[];
+    ageRange: string[];
+  }>({
     species: [],
-    ageRange: []
+    ageRange: [],
   });
-  const [openSections, setOpenSections] = useState<string[]>(['species', 'age']);
+  const [openSections, setOpenSections] = useState<string[]>([]);
 
-  // Filter options
-  const speciesOptions = [
-    { label: 'Dog', value: 'dog' },
-    { label: 'Cat', value: 'cat' },
-    { label: 'Bird', value: 'bird' },
-    { label: 'Other', value: 'other' }
-  ];
+  // Protection contre null/undefined + typage sûr
+  const favoritePets = useMemo(() => (favorites ?? []) as Pet[], [favorites]);
+
+  // Options dynamiques à partir des vrais favoris
+  const speciesOptions = useMemo(() => {
+  const speciesMap = new Map<string, string>();
+
+  favoritePets.forEach(pet => {
+    const s = pet.species;
+    if (!s) return; // saute si null/undefined
+
+    let label = s;
+    if (s === 'dog') label = 'Dogs';
+    else if (s === 'cat') label = 'Cats';
+    else label = s.charAt(0).toUpperCase() + s.slice(1);
+
+    if (!speciesMap.has(s)) {
+      speciesMap.set(s, label);
+    }
+  });
+
+  return Array.from(speciesMap, ([value, label]) => ({ label, value }));
+}, [favoritePets]);
 
   const ageOptions = [
-    { label: 'Puppy/Kitten', value: 'puppy' },
-    { label: 'Young', value: 'young' },
-    { label: 'Adult', value: 'adult' },
-    { label: 'Senior', value: 'senior' }
+    { label: '< 1 an', value: '<12' },
+    { label: '1 à 3 ans', value: '1-3' },
+    { label: '> 3 ans', value: '>3' },
   ];
 
   const toggleSection = (section: string) => {
@@ -50,89 +62,95 @@ export default function Favorites() {
   };
 
   useEffect(() => {
-    const loadFavorites = async () => {
+    const load = async () => {
       try {
         await fetchFavorites();
-      } catch (error) {
-        console.error('Failed to fetch favorites:', error);
+      } catch (err) {
+        console.error(err);
       } finally {
         setIsLoading(false);
       }
     };
-    
-    loadFavorites();
+    load();
   }, [fetchFavorites]);
 
-  const handleRemoveFromFavorites = async (petId: number) => {
-    try {
-      const numericPetId = Number(petId);
-      if (isNaN(numericPetId)) {
-        throw new Error('Invalid pet ID');
+  const handleRemove = async (petId: number) => {
+    await toggleFavorite(petId, true);
+  };
+
+  // Filtrage 100% safe
+  const filteredPets = useMemo(() => {
+    return favoritePets.filter(pet => {
+      if (searchTerm) {
+        const term = searchTerm.toLowerCase();
+        const matchesSearch =
+          pet.name.toLowerCase().includes(term) ||
+          pet.type?.toLowerCase().includes(term) ||
+          pet.shelter?.name.toLowerCase().includes(term);
+        if (!matchesSearch) return false;
       }
-      await toggleFavorite(numericPetId, true);
-    } catch (error) {
-      console.error('Failed to remove from favorites:', error);
-    }
-  };
 
-  const filteredPets = (favorites as Pet[])?.filter((pet) => {
-    const matchesSearch = pet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         pet.breed?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesSpecies = selectedFilters.species.length === 0 || 
-                           selectedFilters.species.includes(pet.type ?? '');
-    
-    const matchesAge = selectedFilters.ageRange.length === 0 || 
-                       selectedFilters.ageRange.includes(pet.ageGroup ?? '');
-    
-    return matchesSearch && matchesSpecies && matchesAge;
-  }) || [];
+      if (selectedFilters.species.length > 0 && 
+          (!pet.species || !selectedFilters.species.includes(pet.species))) {
+        return false;
+      }
 
-  const clearFilters = () => {
-    setSelectedFilters({ species: [], ageRange: [] });
+      if (selectedFilters.ageRange.length > 0) {
+        const age = pet.age;
+        if (age === null || age === undefined) return false;
+        const matchAge = selectedFilters.ageRange.some(range => {
+          if (range === '<12') return age < 1;
+          if (range === '1-3') return age >= 1 && age <= 3;
+          if (range === '>3') return age > 3;
+          return false;
+        });
+        if (!matchAge) return false;
+      }
+
+      return true;
+    });
+  }, [favoritePets, searchTerm, selectedFilters]);
+
+  const clearAll = () => {
     setSearchTerm('');
+    setSelectedFilters({ species: [], ageRange: [] });
   };
-
-  const hasActiveFilters = selectedFilters.species.length > 0 || 
-                          selectedFilters.ageRange.length > 0 || 
-                          searchTerm !== '';
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
-      </div>
+      <AuthenticatedLayout>
+        <div className="flex min-h-screen items-center justify-center bg-[#F7F5EA]">
+          <div className="h-16 w-16 animate-spin rounded-full border-t-4 border-b-4 border-[#D29059]" />
+        </div>
+      </AuthenticatedLayout>
     );
   }
 
   return (
     <AuthenticatedLayout>
-      <div className="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-[#F7F5EA] py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
-          >
-            <h1 className="text-4xl font-bold text-orange-600 mb-3">My Favorite Pets</h1>
-            <p className="text-gray-600">All the pets you've fallen in love with</p>
-          </motion.div>
+          {/* Titre */}
+          <h1 className="text-center text-4xl md:text-5xl font-bold text-[#333] mb-10">
+            My Favorite Pets
+          </h1>
 
-          {/* Search and Filter Bar */}
-          <div className="mb-8 bg-white p-4 rounded-lg shadow-sm">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiSearch className="text-gray-400" />
+          {/* Recherche + Filtre */}
+          <div className="mb-8 bg-white rounded-2xl shadow-sm p-5">
+            <div className="flex flex-col lg:flex-row gap-5 items-center">
+              <div className="relative flex-1 w-full">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#999] text-xl pointer-events-none">
+                  <FiSearch />
                 </div>
                 <input
                   type="text"
-                  placeholder="Search by name or breed..."
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Nom, race, refuge..."
+                  className="w-full pl-12 pr-5 py-4 bg-[#f9f9f9] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D29059]"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={e => setSearchTerm(e.target.value)}
                 />
               </div>
+
               <PetFilters
                 isFilterOpen={isFilterOpen}
                 setIsFilterOpen={setIsFilterOpen}
@@ -144,70 +162,49 @@ export default function Favorites() {
                 toggleSection={toggleSection}
               />
             </div>
+
+            {(searchTerm || selectedFilters.species.length || selectedFilters.ageRange.length) && (
+              <div className="mt-4 flex justify-between text-sm text-[#666]">
+                <span>{filteredPets.length} résultat{filteredPets.length > 1 ? 's' : ''}</span>
+                <button onClick={clearAll} className="text-[#D29059] hover:underline">
+                  Tout effacer
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Results Count */}
-          {hasActiveFilters && (
-            <div className="mb-6 text-sm text-gray-600">
-              Showing {filteredPets.length} {filteredPets.length === 1 ? 'result' : 'results'}
-              <button 
-                onClick={clearFilters}
-                className="ml-2 text-orange-600 hover:text-orange-800"
-              >
-                (Clear all)
-              </button>
-            </div>
-          )}
-
-          {/* Pets Grid */}
+          {/* Résultats */}
           {filteredPets.length === 0 ? (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-16 bg-white rounded-lg shadow-sm"
-            >
-              <div className="mx-auto w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mb-4">
-                <FiHeart className="text-orange-400 text-4xl" />
+            <div className="text-center py-20 bg-white rounded-2xl">
+              <div className="mx-auto text-[#eee] mb-6 flex justify-center">
+                <FiHeart size={112} />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-1">No favorites found</h3>
-              <p className="text-gray-500 max-w-md mx-auto">
-                {favorites.length === 0 
-                  ? "You haven't added any pets to your favorites yet. Browse our pets and click the heart to add them here!"
-                  : "No pets match your current filters. Try adjusting your search or filters."}
+              <h3 className="text-2xl font-bold text-[#333] mb-3">
+                {favoritePets.length === 0 ? 'Aucun favori' : 'Aucun résultat'}
+              </h3>
+              <p className="text-[#666] max-w-lg mx-auto">
+                {favoritePets.length === 0
+                  ? 'Ajoutez des animaux en cliquant sur le cœur !'
+                  : 'Essayez d\'autres filtres ou effacez-les.'}
               </p>
-              {favorites.length > 0 && (
-                <button
-                  onClick={clearFilters}
-                  className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-                >
-                  Clear all filters
-                </button>
-              )}
-            </motion.div>
+            </div>
           ) : (
-            <motion.div 
+            <motion.div
               layout
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
             >
               <AnimatePresence>
-                {filteredPets.map((pet) => (
-                  <motion.div
-                    key={pet.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.2 }}
-                    className="relative"
-                  >
-                    <PetCard props={pet} />
-                    <button
-                      onClick={() => handleRemoveFromFavorites(pet.id)}
-                      className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md text-red-500 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 z-10"
-                      aria-label="Remove from favorites"
-                    >
-                      <FiHeart className="w-5 h-5 fill-current" />
-                    </button>
+                {filteredPets.map(pet => (
+                  <motion.div key={pet.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                    <div className="relative group">
+                      <PetCard props={pet} />
+                      <button
+                        onClick={() => handleRemove(pet.id)}
+                        className="absolute top-4 right-4 p-3 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition z-10 hover:bg-red-50"
+                      >
+                        <FiHeart size={24} color="rgb(239, 68, 68)" />
+                      </button>
+                    </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
