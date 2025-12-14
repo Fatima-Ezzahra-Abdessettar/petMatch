@@ -55,6 +55,9 @@ Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
     Route::get('/adoptions', [AdoptionApplicationController::class, 'mine']);
     Route::post('/pets/{pet}/apply', [AdoptionApplicationController::class, 'store']); // ← CHANGED
     Route::get('/adoption-applications/{adoptionApplication}', [AdoptionApplicationController::class, 'show']);
+    Route::put('/adoptions/{adoptionApplication}', [AdoptionApplicationController::class, 'update']);
+    Route::put('/adoptions/{adoptionApplication}/cancel', [AdoptionApplicationController::class, 'cancel']); // Soft delete
+
 });
 
 // ==========================================

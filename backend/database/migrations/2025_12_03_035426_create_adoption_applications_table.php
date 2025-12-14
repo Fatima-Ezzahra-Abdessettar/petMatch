@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('pet_id')->constrained('pets')->cascadeOnDelete();
             $table->json('form_data')->nullable(); // stockage flexible du formulaire (questions + réponses)
             $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete(); // staff who reviewed
-            $table->enum('status', ['pending', 'approved', 'denied'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'denied', 'canceled'])->default('pending');
             $table->timestamps();
 
             $table->unique(['user_id', 'pet_id']); // un user ne peut pas soumettre deux fois la même demande

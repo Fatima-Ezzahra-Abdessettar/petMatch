@@ -54,27 +54,32 @@ export default function Requests() {
     }
   };
 
-  const handleRetract = async (requestId: number) => {
-    if (!confirm('Are you sure you want to retract this adoption request?')) return;
+  const handleCancel = async (requestId: number) => {
+    if (!confirm('Are you sure you want to cancel this adoption request? This action cannot be undone.')) return;
     
     try {
-      // Add retract endpoint when backend is ready
-      // await api.delete(`/api/adoptions/${requestId}`);
-      alert('Retract functionality will be implemented soon');
+      // Use soft delete (cancel) - change to .delete() for hard delete
+      await api.put(`/api/adoptions/${requestId}/cancel`);
+      
+      // Refresh the list
+      await fetchRequests();
       setShowOptionsMenu(null);
+      alert('Request canceled successfully');
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to retract request');
+      alert(err.response?.data?.message || 'Failed to cancel request');
     }
   };
 
   const getStatusStyle = (status: string) => {
     switch (status) {
       case 'pending':
-        return { bg: 'rgba(255, 238, 225, 1)', text: 'rgba(210, 144, 89, 1)', label: 'En Attente' };
+        return { bg: '#ffeee1', text: '#d29059', label: 'En Attente' };
       case 'approved':
         return { bg: '#d1fae5', text: '#059669', label: 'Acceptée' };
       case 'denied':
         return { bg: '#fee2e2', text: '#dc2626', label: 'Rejetée' };
+      case 'canceled':
+        return { bg: '#ffdae3ff', text: '#cc4768', label: 'Annulée'};
       default:
         return { bg: '#f3f4f6', text: '#6b7280', label: status };
     }
@@ -250,11 +255,11 @@ export default function Requests() {
                                         Edit Request Form
                                       </Link>
                                       <button
-                                        onClick={() => handleRetract(request.id)}
+                                        onClick={() => handleCancel(request.id)}
                                         className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
                                         style={{ color: '#dc2626' }}
                                       >
-                                        Retract Request
+                                        Cancel Request
                                       </button>
                                     </>
                                   )}

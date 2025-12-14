@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '~/api/client';
 import { useNavigate } from 'react-router';
 import { useTheme } from '~/contexts/themeContext';
@@ -23,6 +23,9 @@ const XIcon = ({ className }: { className?: string }) => (
 
 interface AdoptionFormProps {
   petId: number;
+  editMode?: boolean;
+  editRequestId?: number;
+  initialData?: any;
   onSuccess?: () => void;
 }
 
@@ -53,41 +56,54 @@ interface FormData {
   agreedToTerms: boolean;
 }
 
-const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
-  const { isDarkMode } = useTheme();
-  const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState<number>(1);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<boolean>(false);
-  const [showTermsModal, setShowTermsModal] = useState<boolean>(false);
+const AdoptionForm: React.FC<AdoptionFormProps> = ({ 
+  petId,
+  editMode = false,
+  editRequestId,
+  initialData,
+  onSuccess 
+  }) => {
+    const { isDarkMode } = useTheme();
+    const navigate = useNavigate();
+    const [currentStep, setCurrentStep] = useState<number>(1);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<boolean>(false);
+    const [showTermsModal, setShowTermsModal] = useState<boolean>(false);
 
-  const [formData, setFormData] = useState<FormData>({
-    perspectiveParent: 'single',
-    phoneNumber: '',
-    age: '',
-    partnerName: '',
-    partnerPhoneNumber: '',
-    partnerAge: '',
-    hasChildren: null,
-    childrenCount: '',
-    address: '',
-    otherPets: null,
-    housingType: '',
-    ownOrRent: '',
-    hasYard: null,
-    adoptionMotivation: '',
-    concerns: {
-      allergies: false,
-      movingToNewHome: false,
-      behavioralIssues: false,
-      financialIssue: false,
-      lackOfTime: false,
-      other: false
-    },
-    otherConcernDetails: '',
-    agreedToTerms: false
+    const [formData, setFormData] = useState<FormData>(
+      initialData || {
+        perspectiveParent: 'single',
+        phoneNumber: '',
+        age: '',
+        partnerName: '',
+        partnerPhoneNumber: '',
+        partnerAge: '',
+        hasChildren: null,
+        childrenCount: '',
+        address: '',
+        otherPets: null,
+        housingType: '',
+        ownOrRent: '',
+        hasYard: null,
+        adoptionMotivation: '',
+        concerns: {
+          allergies: false,
+          movingToNewHome: false,
+          behavioralIssues: false,
+          financialIssue: false,
+          lackOfTime: false,
+          other: false
+      },
+      otherConcernDetails: '',
+      agreedToTerms: false
   });
+
+    useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+    }
+  }, [initialData]);
 
   const updateField = <K extends keyof FormData>(field: K, value: FormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -204,20 +220,26 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
         }
       };
 
-      const response = await api.post(`/api/pets/${petId}/apply`, submissionData);
+      let response;
+      if (editMode && editRequestId) {
+        // Update existing request
+        response = await api.put(`/api/adoptions/${editRequestId}`, submissionData);
+        console.log('✅ Application updated successfully:', response.data);
+      } else {
+        // Create new request
+        response = await api.post(`/api/pets/${petId}/apply`, submissionData);
+        console.log('✅ Application submitted successfully:', response.data);
+      }
       
-      // Only proceed if successful
       setSuccess(true);
       setCurrentStep(4);
       if (onSuccess) onSuccess();
     } catch (err: any) {
-      // Stay on current step on error
       if (err.response?.status === 401) {
         setError('You must be logged in to submit an adoption application.');
       } else {
-        setError(err.response?.data?.message || 'Failed to submit application. Please try again.');
+        setError(err.response?.data?.message || `Failed to ${editMode ? 'update' : 'submit'} application. Please try again.`);
       }
-      // Explicitly do NOT change step or navigate
     } finally {
       setIsSubmitting(false);
     }
@@ -297,10 +319,26 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
       )}
 
       <div className="rounded-3xl shadow-2xl max-w-2xl w-full p-8" style={{ backgroundColor: bg }}>
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-6 flex items-center gap-2 text-sm transition-colors"
+          style={{ 
+            color: isDarkMode ? '#d1d5db' : '#6b7280',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.color = '#d97706'}
+          onMouseLeave={(e) => e.currentTarget.style.color = isDarkMode ? '#d1d5db' : '#6b7280'}
+        >
+          ← Back
+        </button>
+
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-2" style={{ color: text }}>PETMATCH</h1>
-          <h2 className="text-2xl font-serif mb-4" style={{ color: '#d97706' }}>Pet Adoption Form</h2>
-          <p className="text-sm" style={{ color: subtext }}>Apply to adopt a pet by completing this form.</p>
+          <h2 className="text-2xl font-serif mb-4" style={{ color: '#d97706' }}>
+            {editMode ? 'Edit Adoption Request' : 'Pet Adoption Form'}
+          </h2>
+          <p className="text-sm" style={{ color: subtext }}>
+            {editMode ? 'Update your adoption application details' : 'Apply to adopt a pet by completing this form.'}
+          </p>
         </div>
 
         {currentStep < 4 && (
@@ -581,22 +619,28 @@ const AdoptionForm: React.FC<AdoptionFormProps> = ({ petId, onSuccess }) => {
           </div>
         )}
 
-        {currentStep === 4 && success && (
-          <div className="text-center py-12">
-            <CheckCircle2 />
-            <h3 className="text-2xl font-bold mb-2" style={{ color: text }}>Application Submitted!</h3>
-            <p className="mb-8" style={{ color: subtext }}>Thank you for your application. We'll review it and get back to you soon.</p>
-            <button 
-              onClick={() => navigate('/our-pets')} 
-              className="px-6 py-3 rounded-full font-semibold transition-colors"
-              style={{ backgroundColor: '#d97706', color: 'white' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b45309'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#d97706'}
-            >
-              Back to Browse Pets
-            </button>
-          </div>
-        )}
+      {currentStep === 4 && success && (
+        <div className="text-center py-12">
+          <CheckCircle2 />
+          <h3 className="text-2xl font-bold mb-2" style={{ color: text }}>
+            {editMode ? 'Application Updated!' : 'Application Submitted!'}
+          </h3>
+          <p className="mb-8" style={{ color: subtext }}>
+            {editMode 
+              ? 'Your adoption request has been successfully updated.' 
+              : "Thank you for your application. We'll review it and get back to you soon."}
+          </p>
+          <button 
+            onClick={() => navigate('/requests')} 
+            className="px-6 py-3 rounded-full font-semibold transition-colors"
+            style={{ backgroundColor: '#d97706', color: 'white' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b45309'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#d97706'}
+          >
+            View My Requests
+          </button>
+        </div>
+      )}
 
         {currentStep < 4 && (
           <div className="flex justify-between mt-8 pt-6 border-t" style={{ borderColor: inputBorder }}>
