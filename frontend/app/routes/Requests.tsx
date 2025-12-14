@@ -19,7 +19,7 @@ interface AdoptionRequest {
   form_data: any;
 }
 
-export default function MesDemandes() {
+export default function Requests() {
   const [requests, setRequests] = useState<AdoptionRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
