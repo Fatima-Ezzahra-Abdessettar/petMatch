@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\FavoriteController;
@@ -12,13 +11,10 @@ use App\Http\Controllers\Api\EmailVerificationController;
 // ==========================================
 // PUBLIC ROUTES
 // ==========================================
-
 Route::post('/register', [AuthController::class, 'register'])
     ->middleware('throttle:10,1');
-
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:10,1');
-
 Route::get('/pets', [PetController::class, 'index']);
 
 // Public email verification route (no auth required)
@@ -36,7 +32,6 @@ Route::post('/verify-reset-token', [PasswordResetController::class, 'verifyToken
 // ==========================================
 // AUTHENTICATED ROUTES (Both users & admins)
 // ==========================================
-
 Route::middleware('auth:sanctum')->group(function () {
     // Profile management (shared by both roles)
     Route::get('/me', [AuthController::class, 'me']);
@@ -44,13 +39,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     // View pet details (both roles can view)
-    Route::get('/pets/{pet}', [PetController::class, 'show']); // ← MOVED HERE!
+    Route::get('/pets/{pet}', [PetController::class, 'show']);
 });
 
 // ==========================================
 // USER ROUTES (Adopters only)
 // ==========================================
-
 Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
     // Favorites (users only)
     Route::get('/favorites', [FavoriteController::class, 'index']);
@@ -59,14 +53,16 @@ Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
 
     // Adoption applications (users only)
     Route::get('/adoptions', [AdoptionApplicationController::class, 'mine']);
-    Route::post('/adoption-applications', [AdoptionApplicationController::class, 'store']);
+    Route::post('/pets/{pet}/apply', [AdoptionApplicationController::class, 'store']); // ← CHANGED
     Route::get('/adoption-applications/{adoptionApplication}', [AdoptionApplicationController::class, 'show']);
+    Route::put('/adoptions/{adoptionApplication}', [AdoptionApplicationController::class, 'update']);
+    Route::put('/adoptions/{adoptionApplication}/cancel', [AdoptionApplicationController::class, 'cancel']); // Soft delete
+
 });
 
 // ==========================================
 // ADMIN ROUTES (Shelter staff only)
 // ==========================================
-
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
     // Pet management
     Route::get('/pets', [PetController::class, 'myPets']);

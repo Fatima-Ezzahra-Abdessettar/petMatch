@@ -5,10 +5,12 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from 'app/contexts/themeContext';
 import { AuthProvider } from "app/contexts/auth";
+import { UserProvider } from './contexts/UserContext';
 
 
 import type { Route } from "./+types/root";
@@ -45,23 +47,47 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function App() {
-  const Client = new QueryClient();
+function AppContent() {
+  const location = useLocation();
+  
+  // Routes that should show NavBar (public pages)
+  const publicRoutes = ['/', '/our-pets', '/contact', '/login', '/register', '/error'];
+  const isPublicRoute = publicRoutes.includes(location.pathname);
+  
+  // Check if it's the welcome/user page
+  const isWelcomeUserPage = location.pathname === '/welcome-user'; // adjust to your actual route
+  
+  // Build className conditionally
+  const containerClassName = isWelcomeUserPage 
+    ? 'flex flex-col' 
+    : 'min-h-screen bg-BgLight flex flex-col pt-16';
+  
+  const contentClassName = isWelcomeUserPage 
+    ? '' 
+    : `${isPublicRoute ? 'mt-15 pt-5' : ''} flex-grow container mx-auto px-4`;
+  
   return (
-    
-    <QueryClientProvider client={Client}>
-      <ThemeProvider>
-        <AuthProvider>
-    <div className="min-h-screen bg-BgLight flex flex-col pt-16 ">
-      <NavBar/>
-      <div className="mt-15 pt-5 flex-grow container mx-auto px-4">
+    <div className={containerClassName}>
+      {isPublicRoute && <NavBar/>}
+      <div className={contentClassName}>
         <Outlet />
       </div>
     </div>
-    </AuthProvider>
-    </ThemeProvider>
+  );
+}
+
+export default function App() {
+  const Client = new QueryClient();
+  return (
+    <QueryClientProvider client={Client}>
+      <ThemeProvider>
+        <AuthProvider>
+          <UserProvider>
+            <AppContent />
+          </UserProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
-    
   );
 }
 
