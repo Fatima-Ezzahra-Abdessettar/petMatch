@@ -16,11 +16,11 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F7F5EA]">
+    <div className="flex h-screen overflow-hidden">
       <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 overflow-hidden relative bg-[#F7F5EA]
+        className={`flex-1 flex flex-col transition-all duration-300 overflow-hidden relative 
           ${isSidebarOpen ? "lg:ml-52" : "lg:ml-20"}
         `}
       >

@@ -3,8 +3,9 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import PetCard from '../components/petCard';
 import PetFilters from '../components/PetFilters';
 import Sidebar from '../components/SideBar';
-import TopNavBar from '~/components/TopNavBar'; // Import ajouté
+import TopNavBar from '~/components/TopNavBar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useTheme } from '~/contexts/themeContext';
 import {
   faChevronLeft,
   faChevronRight,
@@ -53,6 +54,7 @@ const PetsPage: React.FC = () => {
     species: [],
     ageRange: [],
   });
+  const { isDarkMode } = useTheme();
 
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,10 +158,25 @@ const PetsPage: React.FC = () => {
   // Loading & Error
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F7F5EA] flex items-center justify-center p-5">
-        <div className="text-center">
-          <FontAwesomeIcon icon={faSpinner} spin size="3x" color="#D29059" />
-          <p className="mt-5 text-lg text-[#666]">Chargement des animaux...</p>
+      <div
+        className="flex min-h-screen duration-300 lg:mb-16 mb-10"
+        style={{ backgroundColor: isDarkMode ? "#36332E" : "#F7F5EA" }}
+      >
+        {/* Sidebar */}
+        <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
+
+        {/* Main content with TopNavBar */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <TopNavBar />
+          <div className={`flex-1 pt-16 transition-all duration-300 ${isOpen ? 'ml-52 lg:ml-52' : 'ml-0 lg:ml-20'}`}>
+            <div className="flex items-center justify-center h-full">
+              <FontAwesomeIcon 
+                icon={faSpinner} 
+                className="text-3xl animate-spin"
+                style={{ color: isDarkMode ? "#D9915B" : "#D29059" }}
+              />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -167,114 +184,181 @@ const PetsPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#F7F5EA] flex items-center justify-center p-5">
-        <div className="text-center bg-white p-10 rounded-xl shadow-lg max-w-md">
-          <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#ff6b6b" />
-          <h3 className="mt-5 text-xl font-medium text-[#333]">Erreur</h3>
-          <p className="text-[#666] my-4">{error}</p>
-          <button onClick={fetchPets} className="px-6 py-3 bg-[#D29059] text-white rounded-lg hover:bg-[#c57a45]">
-            Réessayer
-          </button>
+      <div
+        className="flex min-h-screen duration-300"
+        style={{ backgroundColor: isDarkMode ? "#36332E" : "#F7F5EA" }}
+      >
+        {/* Sidebar */}
+        <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
+
+        {/* Main content with TopNavBar */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <TopNavBar />
+          <div className={`flex-1 pt-16 transition-all duration-300 ${isOpen ? 'ml-52 lg:ml-52' : 'ml-0 lg:ml-20'}`}>
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <FontAwesomeIcon 
+                  icon={faExclamationTriangle} 
+                  className="text-4xl mb-4"
+                  style={{ color: isDarkMode ? "#fca5a5" : "#dc2626" }}
+                />
+                <p style={{ color: isDarkMode ? "#F7F5EA" : "#666" }}>{error}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-[#F7F5EA]">
+    <div
+      className="flex min-h-screen duration-300"
+      style={{ backgroundColor: isDarkMode ? "#36332E" : "#F7F5EA" }}
+    >
       {/* Sidebar */}
       <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
-      {/* Contenu principal avec TopNavBar en haut */}
-      <div className="flex-1 flex flex-col">
-        {/* TopNavBar fixe en haut */}
+      {/* Main content with TopNavBar */}
+      <div className="flex-1 flex flex-col min-w-0">
         <TopNavBar />
 
-        {/* Contenu de la page (décalé sous la navbar) */}
-        <div className={`flex-1 transition-all duration-300 ${isOpen ? 'lg:ml-52' : 'lg:ml-0'}`}>
-          <div className="p-4 md:p-6 lg:p-8">
-            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-              <div className="p-5 md:p-8 border-b border-gray-100">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <h2 className="text-2xl font-semibold text-[#333]">
-                    Pets list
-                    <span className="text-base font-normal text-[#666] ml-3">
-                      ({filteredPets.length})
-                    </span>
-                  </h2>
-
-                  <PetFilters
-                    isFilterOpen={isFilterOpen}
-                    setIsFilterOpen={setIsFilterOpen}
-                    selectedFilters={selectedFilters}
-                    setSelectedFilters={setSelectedFilters}
-                    speciesOptions={speciesOptions}
-                    ageOptions={ageOptions}
-                    openSections={openSections}
-                    toggleSection={toggleSection}
-                  />
-                </div>
-              </div>
-
-              <div className="p-5 md:p-8">
-                {filteredPets.length > 0 ? (
-                  <>
-                    <div
-                      className={`grid gap-6
-                        grid-cols-1
-                        sm:grid-cols-2
-                        md:grid-cols-3
-                        lg:grid-cols-3
-                        xl:grid-cols-4
-                        ${isOpen ? '2xl:grid-cols-3' : '2xl:grid-cols-4'}
-                      `}
+        {/* Page content */}
+        <div className={`flex-1 pt-16 transition-all duration-300 ${isOpen ? 'ml-52 lg:ml-52' : 'ml-0 lg:ml-20'}`}>
+          <div className="w-full px-4 md:px-6 lg:px-8">
+            <div className="max-w-[1920px] mx-auto">
+              <div
+                className="rounded-2xl shadow-sm overflow-hidden duration-300"
+                style={{ backgroundColor: isDarkMode ? "rgba(115, 101, 91, 0.3)" : "white" }}
+              >
+                {/* Header */}
+                <div
+                  className="p-5 md:p-8 border-b duration-300"
+                  style={{ borderColor: isDarkMode ? "#73655B" : "#e5e7eb" }}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <h2
+                      className="text-2xl font-semibold duration-300"
+                      style={{ color: isDarkMode ? "#F5F3ED" : "#333" }}
                     >
-                      {currentPets.map(pet => (
-                        <PetCard key={pet.id} props={adaptPetForCard(pet)} />
-                      ))}
-                    </div>
+                      Pets list
+                      <span
+                        className="text-base font-normal ml-3 duration-300"
+                        style={{ color: isDarkMode ? "#F7F5EA" : "#666" }}
+                      >
+                        ({filteredPets.length})
+                      </span>
+                    </h2>
 
-                    {totalPages > 1 && (
-                      <div className="mt-10 flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t">
-                        <div className="text-sm text-[#666]">
-                          {(currentPage - 1) * itemsPerPage + 1} -{' '}
-                          {Math.min(currentPage * itemsPerPage, filteredPets.length)} sur {filteredPets.length}
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                            disabled={currentPage === 1}
-                            className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-40 hover:bg-[#D29059] hover:text-white transition"
-                          >
-                            <FontAwesomeIcon icon={faChevronLeft} />
-                          </button>
-                          <span className="text-sm text-[#666] px-3">
-                            Page {currentPage} / {totalPages}
-                          </span>
-                          <button
-                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                            disabled={currentPage === totalPages}
-                            className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-40 hover:bg-[#D29059] hover:text-white transition"
-                          >
-                            <FontAwesomeIcon icon={faChevronRight} />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center py-20">
-                    <p className="text-lg text-[#666] mb-6">
-                      Aucun animal trouvé avec ces filtres.
-                    </p>
-                    <button
-                      onClick={() => setSelectedFilters({ species: [], ageRange: [] })}
-                      className="px-6 py-3 bg-[#D29059] text-white rounded-lg hover:bg-[#c57a45]"
-                    >
-                      Effacer les filtres
-                    </button>
+                    <PetFilters
+                      isFilterOpen={isFilterOpen}
+                      setIsFilterOpen={setIsFilterOpen}
+                      selectedFilters={selectedFilters}
+                      setSelectedFilters={setSelectedFilters}
+                      speciesOptions={speciesOptions}
+                      ageOptions={ageOptions}
+                      openSections={openSections}
+                      toggleSection={toggleSection}
+                    />
                   </div>
-                )}
+                </div>
+
+                {/* Content */}
+                <div className="p-5 md:p-8">
+                  {filteredPets.length > 0 ? (
+                    <>
+                      {/* Pet Grid */}
+                      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {currentPets.map(pet => (
+                          <PetCard key={pet.id} props={adaptPetForCard(pet)} />
+                        ))}
+                      </div>
+
+                      {/* Pagination */}
+                      {totalPages > 1 && (
+                        <div
+                          className="mt-10 flex flex-col sm:flex-row justify-between items-center gap-4 pt-6 border-t duration-300"
+                          style={{ borderColor: isDarkMode ? "#73655B" : "#e5e7eb" }}
+                        >
+                          <p
+                            className="text-sm duration-300"
+                            style={{ color: isDarkMode ? "#F7F5EA" : "#666" }}
+                          >
+                            Page {currentPage} sur {totalPages}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                              disabled={currentPage === 1}
+                              className="px-4 py-2 rounded-lg border transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={{
+                                backgroundColor: isDarkMode ? "rgba(115, 101, 91, 0.2)" : "white",
+                                borderColor: isDarkMode ? "#73655B" : "#ddd",
+                                color: isDarkMode ? "#F7F5EA" : "#666"
+                              }}
+                              onMouseEnter={(e) => {
+                                if (currentPage !== 1) {
+                                  e.currentTarget.style.backgroundColor = isDarkMode ? "rgba(115, 101, 91, 0.3)" : "#f8f8f8";
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (currentPage !== 1) {
+                                  e.currentTarget.style.backgroundColor = isDarkMode ? "rgba(115, 101, 91, 0.2)" : "white";
+                                }
+                              }}
+                            >
+                              <FontAwesomeIcon icon={faChevronLeft} />
+                            </button>
+                            <button
+                              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                              disabled={currentPage === totalPages}
+                              className="px-4 py-2 rounded-lg border transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={{
+                                backgroundColor: isDarkMode ? "rgba(115, 101, 91, 0.2)" : "white",
+                                borderColor: isDarkMode ? "#73655B" : "#ddd",
+                                color: isDarkMode ? "#F7F5EA" : "#666"
+                              }}
+                              onMouseEnter={(e) => {
+                                if (currentPage !== totalPages) {
+                                  e.currentTarget.style.backgroundColor = isDarkMode ? "rgba(115, 101, 91, 0.3)" : "#f8f8f8";
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (currentPage !== totalPages) {
+                                  e.currentTarget.style.backgroundColor = isDarkMode ? "rgba(115, 101, 91, 0.2)" : "white";
+                                }
+                              }}
+                            >
+                              <FontAwesomeIcon icon={faChevronRight} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-20">
+                      <p
+                        className="text-lg mb-6 duration-300"
+                        style={{ color: isDarkMode ? "#F7F5EA" : "#666" }}
+                      >
+                        Aucun animal trouvé avec ces filtres.
+                      </p>
+                      <button
+                        onClick={() => setSelectedFilters({ species: [], ageRange: [] })}
+                        className="px-6 py-3 text-white rounded-lg transition-colors duration-300"
+                        style={{ backgroundColor: isDarkMode ? "#D9915B" : "#D29059" }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = isDarkMode ? "#C77D47" : "#c57a45";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = isDarkMode ? "#D9915B" : "#D29059";
+                        }}
+                      >
+                        Effacer les filtres
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

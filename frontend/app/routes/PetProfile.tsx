@@ -1,6 +1,6 @@
 // src/app/routes/PetProfile.tsx
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft,
@@ -10,9 +10,9 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '../components/SideBar';
-import TopNavBar from '~/components/TopNavBar'; // AJOUTÉ ICI
+import TopNavBar from '~/components/TopNavBar';
 import { UserContext } from '~/contexts/UserContext';
-import { Link } from 'react-router-dom';
+import { useTheme } from '~/contexts/themeContext';
 
 interface Pet {
   id: number;
@@ -36,12 +36,12 @@ const PetProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { favorites, toggleFavorite } = useContext(UserContext)!;
+  const { isDarkMode } = useTheme();
 
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Sidebar state
   const [isOpen, setIsOpen] = useState(true);
   const toggleSidebar = () => setIsOpen(prev => !prev);
 
@@ -81,10 +81,10 @@ const PetProfile: React.FC = () => {
     await toggleFavorite(pet.id, isFavorite);
   };
 
-  // Loading
+  /* ===================== LOADING ===================== */
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-[#F7F5EA]">
+      <div className={`flex min-h-screen ${isDarkMode ? 'bg-[#1f1f1f]' : 'bg-[#F7F5EA]'}`}>
         <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
         <div className="flex-1 flex flex-col">
           <TopNavBar />
@@ -96,18 +96,26 @@ const PetProfile: React.FC = () => {
     );
   }
 
-  // Error ou pet non trouvé
+  /* ===================== ERROR ===================== */
   if (error || !pet) {
     return (
-      <div className="flex min-h-screen bg-[#E5E5E5]">
+      <div className={`flex min-h-screen ${isDarkMode ? 'bg-[#1f1f1f]' : 'bg-[#E5E5E5]'}`}>
         <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
         <div className="flex-1 flex flex-col">
           <TopNavBar />
           <div className="flex-1 flex items-center justify-center p-5">
-            <div className="text-center bg-white p-10 rounded-2xl shadow-xl max-w-md">
+            <div
+              className={`text-center p-10 rounded-2xl shadow-xl max-w-md transition-colors duration-300 ${
+                isDarkMode
+                  ? 'bg-[rgba(115,101,91,0.3)] text-[#F5F3ED]'
+                  : 'bg-white text-[#333]'
+              }`}
+            >
               <FontAwesomeIcon icon={faExclamationTriangle} size="3x" color="#ff6b6b" className="mb-4" />
-              <h3 className="text-2xl font-bold text-[#333] mb-3">Animal non trouvé</h3>
-              <p className="text-[#666] mb-6">{error || "Cet animal n'existe pas ou a été supprimé."}</p>
+              <h3 className="text-2xl font-bold mb-3">Animal non trouvé</h3>
+              <p className={isDarkMode ? 'text-[#fca5a5] mb-6' : 'text-[#666] mb-6'}>
+                {error || "Cet animal n'existe pas ou a été supprimé."}
+              </p>
               <button
                 onClick={() => navigate(-1)}
                 className="px-8 py-3 bg-[#D29059] text-white rounded-xl hover:bg-[#c57a45] transition"
@@ -121,43 +129,53 @@ const PetProfile: React.FC = () => {
     );
   }
 
+  /* ===================== MAIN ===================== */
   return (
-    <div className="flex min-h-screen bg-[#F7F5EA]">
-      {/* Sidebar */}
+    <div className="flex min-h-screen ">
       <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
-      {/* Contenu principal avec TopNavBar en haut */}
       <div className="flex-1 flex flex-col">
-        {/* TopNavBar fixée en haut */}
         <TopNavBar />
 
-        {/* Contenu réel de la page */}
         <div className={`flex-1 transition-all duration-300 ${isOpen ? 'lg:ml-52' : 'lg:ml-0'}`}>
           <div className="p-5 md:p-8 lg:p-10 max-w-7xl mx-auto">
-            {/* Bouton retour */}
             <button
               onClick={() => navigate(-1)}
-              className="mb-8 flex items-center gap-3 text-[#666] hover:text-[#D29059] text-lg font-medium transition-colors"
+              className={`mb-8 flex items-center gap-3 text-lg font-medium transition-colors ${
+                isDarkMode ? 'text-[#cfcac4] hover:text-[#D29059]' : 'text-[#666] hover:text-[#D29059]'
+              }`}
             >
               <FontAwesomeIcon icon={faArrowLeft} />
               Retour à la liste
             </button>
 
-            {/* Carte principale */}
-            <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+            <div
+              className={`rounded-3xl shadow-xl overflow-hidden transition-colors duration-300 ${
+                isDarkMode ? 'bg-[rgba(115,101,91,0.3)]' : 'bg-white'
+              }`}
+            >
               <div className="p-6 md:p-10 lg:p-12">
-                {/* En-tête */}
                 <div className="flex flex-col sm:flex-row justify-between items-start gap-6 mb-10">
                   <div>
-                    <h1 className="text-4xl md:text-5xl font-bold text-[#333]">{pet.name}</h1>
-                    <p className="text-xl text-[#666] mt-2">
+                    <h1
+                      className={`text-4xl md:text-5xl font-bold ${
+                        isDarkMode ? 'text-[#F5F3ED]' : 'text-[#333]'
+                      }`}
+                    >
+                      {pet.name}
+                    </h1>
+                    <p className={`text-xl mt-2 ${isDarkMode ? 'text-[#cfcac4]' : 'text-[#666]'}`}>
                       {pet.gender === 'male' ? 'Mâle' : 'Femelle'} • {pet.age} an{pet.age > 1 ? 's' : ''}
                     </p>
                   </div>
+
                   <button
                     onClick={handleToggleFavorite}
-                    className="p-4 rounded-2xl bg-[#f9f9f9] hover:bg-[#FEF3DD] hover:scale-110 transition-all"
-                    aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                    className={`p-4 rounded-2xl transition-all ${
+                      isDarkMode
+                        ? 'bg-[rgba(115,101,91,0.3)] hover:bg-[#73655B]'
+                        : 'bg-[#f9f9f9] hover:bg-[#FEF3DD]'
+                    }`}
                   >
                     <FontAwesomeIcon
                       icon={isFavorite ? faHeartSolid : faHeartRegular}
@@ -166,62 +184,56 @@ const PetProfile: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Grille photo + infos */}
                 <div className="grid lg:grid-cols-2 gap-10 xl:gap-16">
-                  {/* Photo */}
-                  <div className="relative group">
-                    <div className="rounded-3xl overflow-hidden shadow-2xl">
-                      <img
-                        src={pet.profile_picture || '/placeholder-pet.jpg'}
-                        alt={pet.name}
-                        className="w-full h-96 md:h-[500px] lg:h-[600px] object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    </div>
-                  </div>
+                  <img
+                    src={pet.profile_picture || '/placeholder-pet.jpg'}
+                    alt={pet.name}
+                    className="w-full h-[500px] object-cover rounded-3xl shadow-2xl"
+                  />
 
-                  {/* Infos */}
                   <div className="space-y-8">
-                    <div>
-                      <h3 className="text-lg font-semibold text-[#333] mb-4">Informations</h3>
+                    <Section title="Informations">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <InfoItem label="Espèce" value={pet.species === 'dog' ? 'Chien' : pet.species === 'cat' ? 'Chat' : pet.species} />
+                        <InfoItem label="Espèce" value={pet.species} />
                         <InfoItem label="Race" value={pet.type || 'Non spécifiée'} />
                         <InfoItem label="Âge" value={`${pet.age} an${pet.age > 1 ? 's' : ''}`} />
                         <InfoItem label="Sexe" value={pet.gender === 'male' ? 'Mâle' : 'Femelle'} />
-                        {pet.coat_color && <InfoItem label="Couleur du pelage" value={pet.coat_color} />}
-                        {pet.eye_color && <InfoItem label="Couleur des yeux" value={pet.eye_color} />}
+                        {pet.coat_color && <InfoItem label="Pelage" value={pet.coat_color} />}
+                        {pet.eye_color && <InfoItem label="Yeux" value={pet.eye_color} />}
                       </div>
-                    </div>
+                    </Section>
 
-                    <div>
-                      <h3 className="text-lg font-semibold text-[#333] mb-4">Refuge</h3>
-                      <div className="p-5 bg-[#f9f9f9] rounded-2xl">
-                        <p className="font-medium text-[#333]">{pet.shelter.name}</p>
-                        <p className="text-[#666] text-sm">{pet.shelter.city}</p>
+                    <Section title="Refuge">
+                      <div
+                        className={`p-5 rounded-2xl ${
+                          isDarkMode
+                            ? 'bg-[rgba(115,101,91,0.3)] text-[#F7F5EA]'
+                            : 'bg-[#f9f9f9] text-[#333]'
+                        }`}
+                      >
+                        <p className="font-medium">{pet.shelter.name}</p>
+                        <p className={isDarkMode ? 'text-[#cfcac4]' : 'text-[#666]'}>
+                          {pet.shelter.city}
+                        </p>
                       </div>
-                    </div>
+                    </Section>
 
-                    <div>
-                      <h3 className="text-lg font-semibold text-[#333] mb-4">À propos</h3>
-                      <p className="text-[#555] leading-relaxed text-base">
-                        {pet.description || 'Aucune description disponible pour le moment.'}
+                    <Section title="À propos">
+                      <p className={isDarkMode ? 'text-[#F7F5EA]' : 'text-[#555]'}>
+                        {pet.description}
                       </p>
-                    </div>
+                    </Section>
 
-                  {/* Bouton d'adoption */}
-                  <Link
-                    to={`/pet/${pet.id}/adopt`}
-                    className="block w-full"
-                  >
-                    <button style={{cursor: 'pointer'}} className="w-full py-5 bg-gradient-to-r from-[#D29059] to-[#c57a45] hover:from-[#c57a45] hover:to-[#b86b3b] text-white text-xl font-bold rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3">
-                      <FontAwesomeIcon icon={faHeartRegular} className="text-2xl" />
-                      Je veux adopter {pet.name}
-                    </button>
-                  </Link>
+                    <Link to={`/pet/${pet.id}/adopt`}>
+                      <button className="w-full py-5 bg-gradient-to-r from-[#D29059] to-[#c57a45] text-white text-xl font-bold rounded-2xl hover:scale-105 transition">
+                        Je veux adopter {pet.name}
+                      </button>
+                    </Link>
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -229,11 +241,36 @@ const PetProfile: React.FC = () => {
   );
 };
 
-const InfoItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div>
-    <p className="text-sm text-[#999] mb-1">{label}</p>
-    <p className="px-4 py-3 bg-[#f9f9f9] rounded-xl font-medium text-[#333]">{value}</p>
-  </div>
-);
+/* ===================== HELPERS ===================== */
+
+const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => {
+  const { isDarkMode } = useTheme();
+  return (
+    <div>
+      <h3 className={`text-lg font-semibold mb-4 ${isDarkMode ? 'text-[#F7F5EA]' : 'text-[#333]'}`}>
+        {title}
+      </h3>
+      {children}
+    </div>
+  );
+};
+
+const InfoItem: React.FC<{ label: string; value: string }> = ({ label, value }) => {
+  const { isDarkMode } = useTheme();
+  return (
+    <div>
+      <p className={`text-sm mb-1 ${isDarkMode ? 'text-[#cfcac4]' : 'text-[#999]'}`}>{label}</p>
+      <p
+        className={`px-4 py-3 rounded-xl font-medium ${
+          isDarkMode
+            ? 'bg-[rgba(115,101,91,0.3)] text-[#F7F5EA] border border-[#73655B]'
+            : 'bg-[#f9f9f9] text-[#333]'
+        }`}
+      >
+        {value}
+      </p>
+    </div>
+  );
+};
 
 export default PetProfile;
