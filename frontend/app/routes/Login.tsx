@@ -118,8 +118,8 @@ export default function Login() {
             <img
               src={
                 isDarkMode
-                  ? "public/pet-MattchWhite.PNG"
-                  : "public/pet-MattchBlack.PNG"
+                  ? "public/pet-MatchWhite.png"
+                  : "public/pet-MatchBlack.png"
               }
               alt="PetMatch"
               className="w-32"
@@ -262,8 +262,8 @@ export default function Login() {
                 <img
                   src={
                     isDarkMode
-                      ? "public/pet-MattchWhite.PNG"
-                      : "public/pet-MattchBlack.PNG"
+                      ? "public/pet-MatchWhite.png"
+                      : "public/pet-MatchBlack.png"
                   }
                   alt="pet"
                   className="w-40 sm:w-30 lg:w-50 mx-auto mb-4"

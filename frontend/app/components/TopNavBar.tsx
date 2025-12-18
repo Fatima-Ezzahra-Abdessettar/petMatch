@@ -1,3 +1,4 @@
+//frontend/app/components/TopNavBar.tsx
 import React, { useState, useContext } from "react";
 import {
   UserCircleIcon,
@@ -36,7 +37,7 @@ const TopNavBar: React.FC<TopNavBarProps> = ({
   };
 
   return (
-    <div className="fixed top-0 right-0 z-30 px-6 py-3 flex items-center gap-3">
+    <div className="fixed top-0 right-0 z-[80] px-6 py-3 flex items-center gap-3">
       {/* Dark Mode Toggle Button */}
       <motion.button
         onClick={toggleTheme}

@@ -1,3 +1,4 @@
+//frontend/app/contexts/UserContext.tsx
 import React, { createContext, useState, useEffect, type ReactNode, useCallback } from 'react';
 import api, { setAuthToken } from '../api/client';
 import type { Pet } from '~/types';

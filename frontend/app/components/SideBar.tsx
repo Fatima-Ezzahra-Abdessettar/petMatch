@@ -1,3 +1,4 @@
+//frontend/app/components/SideBar.tsx
 import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
@@ -96,7 +97,7 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen bg-[#D29059] flex flex-col transition-all duration-300 ease-in-out z-[100] overflow-hidden
+        className={`fixed left-0 top-0 h-screen bg-[#D29059] flex flex-col transition-all duration-300 ease-in-out z-40 overflow-hidden
           ${isOpen 
             ? 'w-52 lg:w-52' 
             : 'w-52 lg:w-20 -translate-x-full lg:translate-x-0'

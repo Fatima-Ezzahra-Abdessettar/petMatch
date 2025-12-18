@@ -1,16 +1,17 @@
-// src/app/routes/PetProfile.tsx
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft,
   faHeart as faHeartRegular,
   faSpinner,
   faExclamationTriangle,
+  faCheckCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '../components/SideBar';
 import TopNavBar from '~/components/TopNavBar';
+import AdoptionFormModal from '~/components/AdoptionForm';
 import { UserContext } from '~/contexts/UserContext';
 import { useTheme } from '~/contexts/themeContext';
 
@@ -41,8 +42,10 @@ const PetProfile: React.FC = () => {
   const [pet, setPet] = useState<Pet | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
   const [isOpen, setIsOpen] = useState(true);
+  const [isAdoptionModalOpen, setIsAdoptionModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const toggleSidebar = () => setIsOpen(prev => !prev);
 
   const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
@@ -79,6 +82,20 @@ const PetProfile: React.FC = () => {
   const handleToggleFavorite = async () => {
     if (!pet) return;
     await toggleFavorite(pet.id, isFavorite);
+  };
+
+  const handleAdoptionSuccess = () => {
+    setSuccessMessage(`Your adoption request for ${pet?.name} has been submitted successfully! We'll review it and contact you soon.`);
+    
+    // Auto-hide success message after 8 seconds
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 8000);
+  };
+
+  const handleAdoptionError = (error: string) => {
+    // Error is already shown in the modal, so we don't need to do anything here
+    console.error('Adoption error:', error);
   };
 
   /* ===================== LOADING ===================== */
@@ -131,7 +148,7 @@ const PetProfile: React.FC = () => {
 
   /* ===================== MAIN ===================== */
   return (
-    <div className="flex min-h-screen ">
+    <div className="flex min-h-screen">
       <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
       <div className="flex-1 flex flex-col">
@@ -148,6 +165,35 @@ const PetProfile: React.FC = () => {
               <FontAwesomeIcon icon={faArrowLeft} />
               Retour à la liste
             </button>
+
+            {/* Success Message */}
+            {successMessage && (
+              <div
+                className={`mb-6 p-4 rounded-xl flex items-start gap-3 shadow-lg transition-all duration-300 ${
+                  isDarkMode
+                    ? 'bg-[rgba(34,197,94,0.2)] border border-green-500/30'
+                    : 'bg-green-50 border border-green-200'
+                }`}
+              >
+                <FontAwesomeIcon 
+                  icon={faCheckCircle} 
+                  className={`text-xl mt-0.5 ${isDarkMode ? 'text-green-400' : 'text-green-600'}`}
+                />
+                <div className="flex-1">
+                  <p 
+                    className={`font-medium ${isDarkMode ? 'text-green-300' : 'text-green-800'}`}
+                  >
+                    {successMessage}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSuccessMessage(null)}
+                  className={`text-xl ${isDarkMode ? 'text-green-400 hover:text-green-300' : 'text-green-600 hover:text-green-700'}`}
+                >
+                  ×
+                </button>
+              </div>
+            )}
 
             <div
               className={`rounded-3xl shadow-xl overflow-hidden transition-colors duration-300 ${
@@ -224,19 +270,29 @@ const PetProfile: React.FC = () => {
                       </p>
                     </Section>
 
-                    <Link to={`/pet/${pet.id}/adopt`}>
-                      <button className="w-full py-5 bg-gradient-to-r from-[#D29059] to-[#c57a45] text-white text-xl font-bold rounded-2xl hover:scale-105 transition">
-                        Je veux adopter {pet.name}
-                      </button>
-                    </Link>
+                    <button 
+                      onClick={() => setIsAdoptionModalOpen(true)}
+                      className="w-full py-5 bg-gradient-to-r from-[#D29059] to-[#c57a45] text-white text-xl font-bold rounded-2xl hover:scale-105 transition"
+                    >
+                      Je veux adopter {pet.name}
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
+
+      {/* Adoption Form Modal */}
+      <AdoptionFormModal
+        petId={pet.id}
+        petName={pet.name}
+        isOpen={isAdoptionModalOpen}
+        onClose={() => setIsAdoptionModalOpen(false)}
+        onSuccess={handleAdoptionSuccess}
+        onError={handleAdoptionError}
+      />
     </div>
   );
 };
