@@ -16,5 +16,11 @@ export default [
     route("/error","routes/Error.tsx"),
     route("/forgot-password","routes/forgot-password.tsx"),
     route("/reset-password","routes/Reset-password.tsx"),
+
+    // Admin routes
+    route("/admin/requests", "routes/AdminRequests.tsx"),
+    route("/admin/pets", "routes/AdminPets.tsx"),
+    route("/admin/profile", "routes/AdminProfile.tsx"),
+    route("/admin/dashboard", "routes/AdminDashboard.tsx"),
   ] satisfies RouteConfig;
 

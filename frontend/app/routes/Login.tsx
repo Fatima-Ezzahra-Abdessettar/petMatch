@@ -4,6 +4,9 @@ import { Link, useNavigate, useSearchParams } from "react-router";
 import { useAuth } from "~/contexts/auth";
 import { useTheme } from "~/contexts/themeContext";
 import { authService } from "~/api/authService";
+import { UserContext } from "~/contexts/UserContext";
+import { useContext } from "react";
+import api from "~/api/client";
 
 export const meta = () => {
   return [
@@ -17,6 +20,8 @@ export default function Login() {
   const { login } = useAuth();
   const { isDarkMode } = useTheme();
   const [searchParams] = useSearchParams();
+  const { fetchUser } = useContext(UserContext)!; // Add this
+
 
   const [formData, setFormData] = useState({
     email: "",
@@ -65,30 +70,42 @@ export default function Login() {
   }, [showVerificationPrompt, unverifiedEmail]);
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setSuccessMessage("");
-    setLoading(true);
+  e.preventDefault();
+  setError("");
+  setSuccessMessage("");
+  setLoading(true);
 
-    try {
-      await login(formData.email, formData.password);
+  try {
+    await login(formData.email, formData.password);
+    
+    // Fetch user data to get role
+    await fetchUser();
+    
+    // Get user from API to check role immediately
+    const res = await api.get('/api/me');
+    const userData = res.data.user;
+    
+    // Navigate based on role
+    if (userData?.role === "admin") {
+      navigate("/admin/dashboard");
+    } else {
       navigate("/welcome-user");
-    } catch (err: any) {
-      const errorMessage = err.message || "Login failed";
-      
-      if (errorMessage.toLowerCase().includes("verify") || 
-          errorMessage.toLowerCase().includes("verification")) {
-        setUnverifiedEmail(formData.email);
-        setShowVerificationPrompt(true);
-        setCountdown(60);
-      } else {
-        setError(errorMessage);
-      }
-    } finally {
-      setLoading(false);
     }
-  };
-
+  } catch (err: any) {
+    const errorMessage = err.message || "Login failed";
+    
+    if (errorMessage.toLowerCase().includes("verify") || 
+        errorMessage.toLowerCase().includes("verification")) {
+      setUnverifiedEmail(formData.email);
+      setShowVerificationPrompt(true);
+      setCountdown(60);
+    } else {
+      setError(errorMessage);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
   const handleResendEmail = async (isInitial = false) => {
     setResendLoading(true);
     if (!isInitial) {
