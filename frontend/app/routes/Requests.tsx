@@ -113,7 +113,7 @@ export default function Requests() {
 
   return (
     <AuthenticatedLayout>
-      <div className="p-8" style={{ backgroundColor: '#F5F5F5' }}>
+      <div className="p-8" style={{ backgroundColor: '#F7F5EA' }}>
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">

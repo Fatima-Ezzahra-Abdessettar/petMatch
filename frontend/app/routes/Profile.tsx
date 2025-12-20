@@ -30,7 +30,7 @@ const Profile: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}>
+            <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#F7F5EA' }}>
                 <div className="text-center">
                     <div className="text-gray-600">Loading...</div>
                 </div>
@@ -40,7 +40,7 @@ const Profile: React.FC = () => {
 
     if (!user) {
         return (
-            <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#F5F5F5' }}>
+            <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#F7F5EA' }}>
                 <div className="text-center">
                     <div className="text-gray-600 mb-4">User not found. Please log in.</div>
                 </div>
