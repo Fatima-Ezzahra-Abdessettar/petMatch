@@ -40,6 +40,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // View pet details (both roles can view)
     Route::get('/pets/{pet}', [PetController::class, 'show']);
+
+    // The pet matching AI endpoint
+    Route::post('/match-pets', [PetMatchController::class, 'matchPets']);
 });
 
 // ==========================================
