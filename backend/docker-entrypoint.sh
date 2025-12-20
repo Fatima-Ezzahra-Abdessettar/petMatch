@@ -8,6 +8,8 @@ APP_NAME=Laravel
 APP_ENV=production
 APP_KEY=${APP_KEY}
 APP_DEBUG=false
+APP_URL=http://localhost:8000
+
 
 DB_CONNECTION=${DB_CONNECTION}
 DB_HOST=${DB_HOST}

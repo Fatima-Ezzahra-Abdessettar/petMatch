@@ -86,7 +86,7 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
 
   const adminMenuItems = [
     {
-    path: '/adminDashboard', // Add this
+    path: '/admin/dashboard', // Add this
     label: 'Dashboard',
     icon: HomeIcon,
     activeIcon: HomeIconSolid,

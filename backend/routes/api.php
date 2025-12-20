@@ -70,6 +70,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::put('/pets/{pet}', [PetController::class, 'update']);
     Route::delete('/pets/{pet}', [PetController::class, 'destroy']);
     Route::get('/pets/stats', [PetController::class, 'stats']);
+    Route::get('/pets/{pet}', [PetController::class, 'showForAdmin']); 
+
 
     // Adoption application management
     Route::get('/adoption-applications', [AdoptionApplicationController::class, 'forMyShelter']);

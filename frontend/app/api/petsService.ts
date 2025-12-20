@@ -53,7 +53,7 @@ class PetsService {
     try {
       const response = await fetch(`${API_URL}/pets`, {
         method: "GET",
-        headers: getAuthHeaders(), // Use auth headers
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -73,7 +73,7 @@ class PetsService {
     try {
       const response = await fetch(`${API_URL}/admin/pets`, {
         method: "GET",
-        headers: getAuthHeaders(), // Add auth headers
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -94,12 +94,13 @@ class PetsService {
     try {
       const response = await fetch(`${API_URL}/admin/pets`, {
         method: "POST",
-        headers: getAuthHeaders(), // Add auth headers
+        headers: getAuthHeaders(),
         body: JSON.stringify(petData),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create pet");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to create pet");
       }
 
       const pet: Pet = await response.json();
@@ -114,12 +115,13 @@ class PetsService {
     try {
       const response = await fetch(`${API_URL}/admin/pets/${id}`, {
         method: "PUT",
-        headers: getAuthHeaders(), // Add auth headers
+        headers: getAuthHeaders(),
         body: JSON.stringify(petData),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update pet");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to update pet");
       }
 
       const pet: Pet = await response.json();
@@ -134,7 +136,7 @@ class PetsService {
     try {
       const response = await fetch(`${API_URL}/admin/pets/${id}`, {
         method: "DELETE",
-        headers: getAuthHeaders(), // Add auth headers
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -150,7 +152,7 @@ class PetsService {
     try {
       const response = await fetch(`${API_URL}/admin/adoption-applications`, {
         method: "GET",
-        headers: getAuthHeaders(), // Add auth headers
+        headers: getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -169,7 +171,7 @@ class PetsService {
     try {
       const response = await fetch(`${API_URL}/admin/adoption-applications/${id}/status`, {
         method: "PUT",
-        headers: getAuthHeaders(), // Add auth headers
+        headers: getAuthHeaders(),
         body: JSON.stringify({ status }),
       });
 

@@ -3,158 +3,291 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pet;
-use App\Models\Shelter;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Str;
 
 class PetController extends Controller
 {
-    // ==========================================
-    // PUBLIC ROUTES
-    // ==========================================
-
-    // GET /pets - List all pets (public)
+    /**
+     * Display a listing of pets (public)
+     */
     public function index()
     {
-        return Pet::with('shelter')->get();
+        $pets = Pet::with('shelter')->where('status', 'available')->get();
+        return response()->json($pets);
     }
 
-    // GET /pets/{pet} - View single pet 
+    /**
+     * Display the specified pet (authenticated)
+     */
     public function show(Pet $pet)
     {
-        return $pet->load('shelter');
+        $pet->load('shelter');
+        return response()->json($pet);
     }
 
-    // ==========================================
-    // ADMIN-ONLY ROUTES
-    // ==========================================
-
-    // GET /admin/pets - List MY shelter's pets
+    /**
+     * Get pets for the authenticated admin's shelter
+     */
     public function myPets()
     {
-        $user = Auth::user();
-        
-        // Check if user is admin with shelter
-        if ($user->role !== 'admin' || !$user->shelter_id) {
-            throw new AuthorizationException('Unauthorized. Only shelter admins can access this.');
-        }
+        $admin = Auth::user();
 
-        return Pet::with('shelter')
-            ->where('shelter_id', $user->shelter_id)
+        $pets = Pet::where('shelter_id', $admin->shelter_id)
+            ->with('shelter')
+            ->orderBy('created_at', 'desc')
             ->get();
+
+        return response()->json($pets);
     }
 
-    // POST /admin/pets - Create pet (admin only)
+    /**
+     * Store a newly created pet
+     */
     public function store(Request $request)
     {
-        // Check authorization using policy
-        $this->authorize('create', Pet::class);
+        $admin = Auth::user();
 
-        $data = $request->validate([
-            'name' => 'required|string',
-            'species' => 'required|string',
-            'type' => 'nullable|string',
-            'age' => 'nullable|integer',
-            'description' => 'nullable|string',
-            'gender' => 'required|in:male,female,unknown',
-            'status' => 'nullable|in:available,pending,adopted',
-            'profile_picture' => 'required|image|max:2048',
+        Log::info('Store method called', [
+            'has_file' => $request->hasFile('profile_picture'),
+            'all_files' => $request->allFiles(),
+            'content_type' => $request->header('Content-Type'),
         ]);
 
-        // Handle image upload
-        $path = $request->file('profile_picture')->store('pets', 'public');
-        $data['profile_picture'] = '/storage/' . $path;
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'species' => 'nullable|string|max:100',
+            'type' => 'nullable|string|max:100',
+            'age' => 'nullable|integer|min:0',
+            'gender' => 'required|in:male,female',
+            'profile_picture' => 'nullable|image|max:5120', // 5MB max
+            'status' => 'required|in:available,adopted,pending',
+            'description' => 'required|string',
+        ]);
 
-        // Auto-assign from logged-in admin
-        $data['shelter_id'] = Auth::user()->shelter_id;
-        $data['added_by'] = Auth::id();
+        // Handle file upload
+        $profilePicturePath = null;
+        if ($request->hasFile('profile_picture')) {
+            $profilePicturePath = $this->handleFileUpload($request->file('profile_picture'));
+        }
 
-        $pet = Pet::create($data);
+        $pet = Pet::create([
+            'name' => $data['name'],
+            'species' => $data['species'] ?? null,
+            'type' => $data['type'] ?? null,
+            'age' => $data['age'] ?? null,
+            'gender' => $data['gender'],
+            'profile_picture' => $profilePicturePath,
+            'status' => $data['status'],
+            'description' => $data['description'],
+            'shelter_id' => $admin->shelter_id,
+            'added_by' => $admin->id,
+        ]);
 
-        return response()->json([
-            'message' => 'Pet created successfully',
-            'pet' => $pet->load('shelter')
-        ], 201);
+        Log::info('Pet created', [
+            'pet_id' => $pet->id,
+            'profile_picture' => $pet->profile_picture,
+        ]);
+
+        return response()->json($pet, 201);
     }
 
-    // PUT /admin/pets/{pet} - Update pet (admin only)
+    /**
+     * Update the specified pet
+     */
     public function update(Request $request, Pet $pet)
     {
-        // Check authorization using policy
-        $this->authorize('update', $pet);
+        $admin = Auth::user();
+
+        // Ensure the pet belongs to the admin's shelter
+        if ($pet->shelter_id !== $admin->shelter_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
 
         $data = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'species' => 'sometimes|required|string|max:100',
-            'type' => 'sometimes|nullable|string|max:100',
-            'age' => 'sometimes|nullable|integer|min:0',
-            'description' => 'sometimes|nullable|string',
-            'gender' => ['sometimes', 'required', 'in:male,female,unknown'],
-            'status' => ['sometimes', 'required', 'in:available,pending,adopted'],
-            'profile_picture' => 'sometimes|image|max:2048',
+            'species' => 'nullable|string|max:100',
+            'type' => 'nullable|string|max:100',
+            'age' => 'nullable|integer|min:0',
+            'gender' => 'sometimes|required|in:male,female',
+            'profile_picture' => 'nullable|image|max:5120',
+            'status' => 'sometimes|required|in:available,adopted,pending',
+            'description' => 'sometimes|required|string',
         ]);
 
-        // Handle image if provided
+        // Handle image upload
         if ($request->hasFile('profile_picture')) {
-            // Delete old image if it's local
-            if ($pet->profile_picture && str_starts_with($pet->profile_picture, '/storage/')) {
-                Storage::disk('public')->delete(
-                    str_replace('/storage/', '', $pet->profile_picture)
-                );
+            // Delete old image if exists
+            if ($pet->profile_picture) {
+                $this->deleteImage($pet->profile_picture);
             }
-
-            $path = $request->file('profile_picture')->store('pets', 'public');
-            $data['profile_picture'] = '/storage/' . $path;
+            // Upload new image
+            $data['profile_picture'] = $this->handleFileUpload($request->file('profile_picture'));
         }
 
         $pet->update($data);
 
-        return response()->json([
-            'message' => 'Pet updated successfully',
-            'pet' => $pet->fresh()->load('shelter')
-        ]);
+        return response()->json($pet);
     }
 
-    // DELETE /admin/pets/{pet} - Delete pet (admin only)
+    /**
+     * Remove the specified pet
+     */
     public function destroy(Pet $pet)
     {
-        // Check authorization using policy
-        $this->authorize('delete', $pet);
+        $admin = Auth::user();
 
-        // Delete image
-        if ($pet->profile_picture && str_starts_with($pet->profile_picture, '/storage/')) {
-            Storage::disk('public')->delete(
-                str_replace('/storage/', '', $pet->profile_picture)
-            );
+        // Ensure the pet belongs to the admin's shelter
+        if ($pet->shelter_id !== $admin->shelter_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Delete image if exists
+        if ($pet->profile_picture) {
+            $this->deleteImage($pet->profile_picture);
         }
 
         $pet->delete();
 
-        return response()->json([
-            'message' => 'Pet deleted successfully'
-        ], 200);
+        return response()->json(['message' => 'Pet deleted successfully']);
     }
 
-    // GET /admin/pets/stats - Stats for MY shelter (admin only)
+    /**
+     * Get pet statistics for the admin's shelter
+     */
     public function stats()
     {
-        $user = Auth::user();
-        
-        // Check if user is admin with shelter
-        if ($user->role !== 'admin' || !$user->shelter_id) {
-            throw new AuthorizationException('Unauthorized. Only shelter admins can access this.');
+        $admin = Auth::user();
+
+        $stats = [
+            'total' => Pet::where('shelter_id', $admin->shelter_id)->count(),
+            'available' => Pet::where('shelter_id', $admin->shelter_id)->where('status', 'available')->count(),
+            'adopted' => Pet::where('shelter_id', $admin->shelter_id)->where('status', 'adopted')->count(),
+            'pending' => Pet::where('shelter_id', $admin->shelter_id)->where('status', 'pending')->count(),
+        ];
+
+        return response()->json($stats);
+    }
+
+    /**
+     * Handle file upload
+     */
+    private function handleFileUpload($file)
+{
+    try {
+        Log::info('Starting file upload', [
+            'original_name' => $file->getClientOriginalName(),
+            'size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+        ]);
+
+        // Ensure the pets directory exists
+        if (!Storage::disk('public')->exists('pets')) {
+            Storage::disk('public')->makeDirectory('pets');
+            Log::info('Created pets directory');
         }
 
-        $shelterId = $user->shelter_id;
+        // Generate unique filename
+        $extension = $file->getClientOriginalExtension();
+        $fileName = Str::random(40) . '.' . $extension;
 
-        return response()->json([
-            'total' => Pet::where('shelter_id', $shelterId)->count(),
-            'available' => Pet::where('shelter_id', $shelterId)->where('status', 'available')->count(),
-            'pending' => Pet::where('shelter_id', $shelterId)->where('status', 'pending')->count(),
-            'adopted' => Pet::where('shelter_id', $shelterId)->where('status', 'adopted')->count(),
+        Log::info('Generated filename', ['filename' => $fileName]);
+
+        // Store in public disk under 'pets' directory
+        $path = $file->storeAs('pets', $fileName, 'public');
+
+        Log::info('File stored', [
+            'path' => $path,
+            'full_path' => storage_path('app/public/' . $path),
+            'exists' => Storage::disk('public')->exists($path),
         ]);
+
+        // Return the full URL with backend domain
+        $backendUrl = env('APP_URL', 'http://localhost:8000');
+        return $backendUrl . '/storage/' . $path;
+    } catch (\Exception $e) {
+        Log::error('File upload error: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
+        return null;
+    }
+}
+    /**
+     * Delete image from storage
+     */
+    private function deleteImage($imagePath)
+    {
+        if (empty($imagePath)) {
+            return;
+        }
+
+        try {
+            // Extract the file path from URL
+            if (strpos($imagePath, '/storage/') === 0) {
+                $filePath = str_replace('/storage/', '', $imagePath);
+                
+                if (Storage::disk('public')->exists($filePath)) {
+                    Storage::disk('public')->delete($filePath);
+                    Log::info('Deleted image', ['path' => $filePath]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Error deleting image: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show a single pet for admin (for editing)
+     */
+    public function showForAdmin(Pet $pet)
+    {
+        $admin = Auth::user();
+
+        // Ensure the pet belongs to the admin's shelter
+        if ($pet->shelter_id !== $admin->shelter_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $pet->load('shelter');
+        return response()->json($pet);
+    }
+
+    /**
+     * Test storage functionality
+     */
+    public function testStorage()
+    {
+        try {
+            // Test writing a file
+            Storage::disk('public')->put('test.txt', 'Hello World');
+            
+            $exists = Storage::disk('public')->exists('test.txt');
+            $path = storage_path('app/public/test.txt');
+            
+            // Create pets directory if it doesn't exist
+            if (!Storage::disk('public')->exists('pets')) {
+                Storage::disk('public')->makeDirectory('pets');
+            }
+            
+            return response()->json([
+                'success' => true,
+                'storage_path' => storage_path('app/public'),
+                'file_exists' => $exists,
+                'full_path' => $path,
+                'is_writable' => is_writable(storage_path('app/public')),
+                'pets_dir_exists' => Storage::disk('public')->exists('pets'),
+                'contents' => $exists ? Storage::disk('public')->get('test.txt') : null,
+                'files_in_public' => Storage::disk('public')->allFiles(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
     }
 }
