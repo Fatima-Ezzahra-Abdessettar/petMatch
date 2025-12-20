@@ -11,7 +11,7 @@ export default [
 
     route("/profile","routes/Profile.tsx"),
     route("/favorites", "routes/Favorites.tsx"),
-    route("/welcome-user", "routes/WelcomeUser.tsx"),
+    route("/welcome-user", "routes/AIwelcome.tsx"),
     route("/login","routes/Login.tsx"),      // lowercase
     route("/register","routes/Register.tsx"),  // lowercase
     route("/error","routes/Error.tsx"),
