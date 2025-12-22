@@ -28,7 +28,7 @@ const AuthenticatedLayout: React.FC<AuthenticatedLayoutProps> = ({ children }) =
         <TopNavBar onMenuClick={toggleSidebar} />
 
         {/* Page content – NO overflow here */}
-        <main className="flex-1 pt-16 px-4 md:px-6">
+        <main className="flex-1">
           {children}
         </main>
       </div>

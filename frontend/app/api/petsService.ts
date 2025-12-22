@@ -37,10 +37,25 @@ export interface AdoptionApplication {
     species: string;
   };
 }
+export interface PetStats {
+  total: number;
+  available: number;
+  adopted: number;
+  pending: number;
+  by_species: Array<{ species: string; count: number }>;
+  recent_additions: number;
+  recent_adoptions: number;
+  by_gender: Array<{ gender: string; count: number }>;
+}
+
+export interface DashboardActivity {
+  recent_additions: Pet[];
+  recent_adoptions: Pet[];
+}
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   return {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -78,7 +93,11 @@ class PetsService {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Failed to fetch admin pets:", response.status, errorText);
+        console.error(
+          "Failed to fetch admin pets:",
+          response.status,
+          errorText
+        );
         throw new Error("Failed to fetch admin pets");
       }
 
@@ -90,7 +109,7 @@ class PetsService {
     }
   }
 
-  async createPet(petData: Omit<Pet, 'id'>): Promise<Pet> {
+  async createPet(petData: Omit<Pet, "id">): Promise<Pet> {
     try {
       const response = await fetch(`${API_URL}/admin/pets`, {
         method: "POST",
@@ -167,13 +186,19 @@ class PetsService {
     }
   }
 
-  async updateAdoptionApplicationStatus(id: number, status: string): Promise<AdoptionApplication> {
+  async updateAdoptionApplicationStatus(
+    id: number,
+    status: string
+  ): Promise<AdoptionApplication> {
     try {
-      const response = await fetch(`${API_URL}/admin/adoption-applications/${id}/status`, {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ status }),
-      });
+      const response = await fetch(
+        `${API_URL}/admin/adoption-applications/${id}/status`,
+        {
+          method: "PUT",
+          headers: getAuthHeaders(),
+          body: JSON.stringify({ status }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to update adoption application status");
@@ -183,6 +208,41 @@ class PetsService {
       return application;
     } catch (error) {
       console.error("Update adoption application status error:", error);
+      throw error;
+    }
+  }
+  async getDashboardStats(): Promise<PetStats> {
+    try {
+      const response = await fetch(`${API_URL}/admin/pets/dashboard/stats`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch dashboard stats");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Get dashboard stats error:", error);
+      throw error;
+    }
+  }
+
+  async getDashboardActivity(): Promise<DashboardActivity> {
+    try {
+      const response = await fetch(`${API_URL}/admin/pets/dashboard/activity`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch dashboard activity");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Get dashboard activity error:", error);
       throw error;
     }
   }

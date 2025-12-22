@@ -161,60 +161,104 @@ class PetController extends Controller
     public function stats()
     {
         $admin = Auth::user();
+        $shelterId = $admin->shelter_id;
 
         $stats = [
-            'total' => Pet::where('shelter_id', $admin->shelter_id)->count(),
-            'available' => Pet::where('shelter_id', $admin->shelter_id)->where('status', 'available')->count(),
-            'adopted' => Pet::where('shelter_id', $admin->shelter_id)->where('status', 'adopted')->count(),
-            'pending' => Pet::where('shelter_id', $admin->shelter_id)->where('status', 'pending')->count(),
+            'total' => Pet::where('shelter_id', $shelterId)->count(),
+            'available' => Pet::where('shelter_id', $shelterId)->where('status', 'available')->count(),
+            'adopted' => Pet::where('shelter_id', $shelterId)->where('status', 'adopted')->count(),
+            'pending' => Pet::where('shelter_id', $shelterId)->where('status', 'pending')->count(),
+
+            // Add these new metrics:
+            'by_species' => Pet::where('shelter_id', $shelterId)
+                ->selectRaw('species, count(*) as count')
+                ->groupBy('species')
+                ->get(),
+
+            'recent_additions' => Pet::where('shelter_id', $shelterId)
+                ->where('created_at', '>=', now()->subDays(30))
+                ->count(),
+
+            'recent_adoptions' => Pet::where('shelter_id', $shelterId)
+                ->where('status', 'adopted')
+                ->where('updated_at', '>=', now()->subDays(30))
+                ->count(),
+
+            'by_gender' => Pet::where('shelter_id', $shelterId)
+                ->selectRaw('gender, count(*) as count')
+                ->groupBy('gender')
+                ->get(),
         ];
 
         return response()->json($stats);
     }
+    /**
+     * Get recent activity for the dashboard
+     */
+    public function recentActivity()
+    {
+        $admin = Auth::user();
 
+        $recentPets = Pet::where('shelter_id', $admin->shelter_id)
+            ->with('shelter')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $recentAdoptions = Pet::where('shelter_id', $admin->shelter_id)
+            ->where('status', 'adopted')
+            ->orderBy('updated_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'recent_additions' => $recentPets,
+            'recent_adoptions' => $recentAdoptions,
+        ]);
+    }
     /**
      * Handle file upload
      */
     private function handleFileUpload($file)
-{
-    try {
-        Log::info('Starting file upload', [
-            'original_name' => $file->getClientOriginalName(),
-            'size' => $file->getSize(),
-            'mime_type' => $file->getMimeType(),
-        ]);
+    {
+        try {
+            Log::info('Starting file upload', [
+                'original_name' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+                'mime_type' => $file->getMimeType(),
+            ]);
 
-        // Ensure the pets directory exists
-        if (!Storage::disk('public')->exists('pets')) {
-            Storage::disk('public')->makeDirectory('pets');
-            Log::info('Created pets directory');
+            // Ensure the pets directory exists
+            if (!Storage::disk('public')->exists('pets')) {
+                Storage::disk('public')->makeDirectory('pets');
+                Log::info('Created pets directory');
+            }
+
+            // Generate unique filename
+            $extension = $file->getClientOriginalExtension();
+            $fileName = Str::random(40) . '.' . $extension;
+
+            Log::info('Generated filename', ['filename' => $fileName]);
+
+            // Store in public disk under 'pets' directory
+            $path = $file->storeAs('pets', $fileName, 'public');
+
+            Log::info('File stored', [
+                'path' => $path,
+                'full_path' => storage_path('app/public/' . $path),
+                'exists' => Storage::disk('public')->exists($path),
+            ]);
+
+            // Return the full URL with backend domain
+            $backendUrl = env('APP_URL', 'http://localhost:8000');
+            return $backendUrl . '/storage/' . $path;
+        } catch (\Exception $e) {
+            Log::error('File upload error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            return null;
         }
-
-        // Generate unique filename
-        $extension = $file->getClientOriginalExtension();
-        $fileName = Str::random(40) . '.' . $extension;
-
-        Log::info('Generated filename', ['filename' => $fileName]);
-
-        // Store in public disk under 'pets' directory
-        $path = $file->storeAs('pets', $fileName, 'public');
-
-        Log::info('File stored', [
-            'path' => $path,
-            'full_path' => storage_path('app/public/' . $path),
-            'exists' => Storage::disk('public')->exists($path),
-        ]);
-
-        // Return the full URL with backend domain
-        $backendUrl = env('APP_URL', 'http://localhost:8000');
-        return $backendUrl . '/storage/' . $path;
-    } catch (\Exception $e) {
-        Log::error('File upload error: ' . $e->getMessage(), [
-            'trace' => $e->getTraceAsString()
-        ]);
-        return null;
     }
-}
     /**
      * Delete image from storage
      */
@@ -228,7 +272,7 @@ class PetController extends Controller
             // Extract the file path from URL
             if (strpos($imagePath, '/storage/') === 0) {
                 $filePath = str_replace('/storage/', '', $imagePath);
-                
+
                 if (Storage::disk('public')->exists($filePath)) {
                     Storage::disk('public')->delete($filePath);
                     Log::info('Deleted image', ['path' => $filePath]);
@@ -263,15 +307,15 @@ class PetController extends Controller
         try {
             // Test writing a file
             Storage::disk('public')->put('test.txt', 'Hello World');
-            
+
             $exists = Storage::disk('public')->exists('test.txt');
             $path = storage_path('app/public/test.txt');
-            
+
             // Create pets directory if it doesn't exist
             if (!Storage::disk('public')->exists('pets')) {
                 Storage::disk('public')->makeDirectory('pets');
             }
-            
+
             return response()->json([
                 'success' => true,
                 'storage_path' => storage_path('app/public'),
