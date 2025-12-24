@@ -6,6 +6,8 @@ use App\Http\Controllers\AdoptionApplicationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\PasswordResetController;
 use App\Http\Controllers\Api\EmailVerificationController;
+use App\Http\Controllers\UserPreferenceController;
+use App\Http\Controllers\PetMatchController;
 
 
 // ==========================================
@@ -29,6 +31,8 @@ Route::post('/forgot-password', [PasswordResetController::class, 'forgotPassword
 Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
 Route::post('/verify-reset-token', [PasswordResetController::class, 'verifyToken']);
 
+
+
 // ==========================================
 // AUTHENTICATED ROUTES (Both users & admins)
 // ==========================================
@@ -43,6 +47,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // The pet matching AI endpoint
     Route::post('/match-pets', [PetMatchController::class, 'matchPets']);
+
+    // User Preference Extraction Route
+    Route::post('/extract-preferences', [UserPreferenceController::class, 'extractPreferences']);
 });
 
 // ==========================================
