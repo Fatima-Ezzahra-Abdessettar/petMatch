@@ -10,13 +10,14 @@ APP_KEY=${APP_KEY}
 APP_DEBUG=false
 APP_URL=http://localhost:8000
 
-
 DB_CONNECTION=${DB_CONNECTION}
 DB_HOST=${DB_HOST}
 DB_PORT=${DB_PORT}
 DB_DATABASE=${DB_DATABASE}
 DB_USERNAME=${DB_USERNAME}
 DB_PASSWORD=${DB_PASSWORD}
+
+GROQ_API_KEY=${GROQ_API_KEY}
 
 MAIL_MAILER=smtp
 MAIL_HOST=mailpit
@@ -32,7 +33,7 @@ SESSION_DRIVER=file
 QUEUE_CONNECTION=sync
 EOF
 
-echo "📋 .env generated"
+echo "📋 .env generated with GROQ_API_KEY"
 
 # wait for DB
 echo "⏳ Waiting for database..."

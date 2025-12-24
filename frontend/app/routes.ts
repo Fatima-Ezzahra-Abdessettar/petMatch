@@ -11,6 +11,7 @@ export default [
     route("/profile","routes/Profile.tsx"),
     route("/favorites", "routes/Favorites.tsx"),
     route("/welcome-user", "routes/AIwelcome.tsx"),
+    route("/match-results", "routes/MatchResults.tsx"), 
     route("/login","routes/Login.tsx"),
     route("/register","routes/Register.tsx"),
     route("/error","routes/Error.tsx"),

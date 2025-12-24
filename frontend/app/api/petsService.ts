@@ -64,6 +64,8 @@ const getAuthHeaders = () => {
 };
 
 class PetsService {
+  private matchPetsAbortController: AbortController | null = null;
+
   async getPets(): Promise<Pet[]> {
     try {
       const response = await fetch(`${API_URL}/pets`, {
@@ -244,6 +246,48 @@ class PetsService {
     } catch (error) {
       console.error("Get dashboard activity error:", error);
       throw error;
+    }
+  }
+
+  // AI Pet Matching
+  async matchPets(userMessage: string): Promise<{ pets: Pet[]; total: number; message: string }> {
+    // Cancel any previous in-flight request
+    if (this.matchPetsAbortController) {
+      this.matchPetsAbortController.abort();
+    }
+
+    // Create new abort controller for this request
+    this.matchPetsAbortController = new AbortController();
+
+    try {
+      const response = await fetch(`${API_URL}/match-pets`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ user_message: userMessage }),
+        signal: this.matchPetsAbortController.signal,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to match pets");
+      }
+
+      const data = await response.json();
+      return {
+        pets: data.pets || [],
+        total: data.total || 0,
+        message: data.message || "Matches found"
+      };
+    } catch (error) {
+      // Don't log abort errors (they're intentional)
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Previous match pets request cancelled');
+        throw new Error('Request cancelled');
+      }
+      console.error("Match pets error:", error);
+      throw error;
+    } finally {
+      this.matchPetsAbortController = null;
     }
   }
 }

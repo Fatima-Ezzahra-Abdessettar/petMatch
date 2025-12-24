@@ -1,16 +1,21 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "../contexts/auth";
 import AuthenticatedLayout from "../components/AuthenticatedLayout";
 import React, { useState } from "react";
 import { useTheme } from "~/contexts/themeContext";
 import { motion } from "framer-motion";
 import { useVoiceInput } from "../components/UsevoiceInput";
+import { petsService, type Pet } from "../api/petsService";
 
 export default function WelcomeUser() {
   const { isDarkMode, toggleTheme } = useTheme();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [description, setDescription] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [requestInProgress, setRequestInProgress] = useState(false);
 
   // Voice input integration
   const { isListening, isSupported, toggleListening } = useVoiceInput({
@@ -26,10 +31,51 @@ export default function WelcomeUser() {
     language: "en-US", // You can make this dynamic based on user preference
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle AI match submission
-    console.log("Pet description:", description);
+    
+    // Prevent duplicate submissions
+    if (requestInProgress || isLoading) {
+      console.log('Request already in progress, ignoring duplicate submission');
+      return;
+    }
+    
+    // Validate description
+    if (!description.trim()) {
+      setError("Please enter a description of your ideal pet");
+      return;
+    }
+
+    setRequestInProgress(true);
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Call the AI matching API with user_message
+      const response = await petsService.matchPets(description);
+      
+      // Navigate to results page with the matched pets
+      navigate("/match-results", { 
+        state: { 
+          pets: response.pets, 
+          description,
+          total: response.total,
+          message: response.message
+        } 
+      });
+      
+    } catch (err) {
+      console.error("AI matching error:", err);
+      setError(
+        err instanceof Error 
+          ? err.message 
+          : "Failed to match pets. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+      // Keep requestInProgress true for a bit longer to prevent rapid re-submissions
+      setTimeout(() => setRequestInProgress(false), 1000);
+    }
   };
 
   const toggleFaq = (index: number) => {
@@ -180,6 +226,7 @@ export default function WelcomeUser() {
                         borderColor: isDarkMode ? "#73655B" : "#e5e7eb",
                         color: isDarkMode ? "#F7F5EA" : "#1f2937",
                       }}
+                      disabled={isLoading || requestInProgress}
                     />
 
                     {/* Bottom left indicator */}
@@ -201,6 +248,7 @@ export default function WelcomeUser() {
                         title={
                           isListening ? "Stop recording" : "Start voice input"
                         }
+                        disabled={isLoading || requestInProgress}
                       >
                         {isListening ? (
                           <motion.div
@@ -234,13 +282,41 @@ export default function WelcomeUser() {
                     </motion.div>
                   )}
 
+                  {/* Error message */}
+                  {error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center justify-center gap-2 text-sm text-red-500"
+                    >
+                      <i className="ri-error-warning-line"></i>
+                      <span>{error}</span>
+                    </motion.div>
+                  )}
+
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: isLoading || requestInProgress ? 1 : 1.02 }}
+                    whileTap={{ scale: isLoading || requestInProgress ? 1 : 0.98 }}
                     type="submit"
-                    className="w-full px-8 py-4 bg-[#D97F3E] text-white rounded-xl text-lg font-medium shadow-lg hover:bg-[#c17135] transition-colors flex items-center justify-center gap-2"
+                    disabled={isLoading || requestInProgress}
+                    className="w-full px-8 py-4 bg-[#D97F3E] text-white rounded-xl text-lg font-medium shadow-lg hover:bg-[#c17135] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Send description
+                    {isLoading ? (
+                      <>
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                        >
+                          <i className="ri-loader-4-line"></i>
+                        </motion.div>
+                        <span>Finding your perfect match...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Send description</span>
+                        <i className="ri-send-plane-fill"></i>
+                      </>
+                    )}
                   </motion.button>
                 </form>
               </div>
