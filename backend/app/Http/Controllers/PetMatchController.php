@@ -4,23 +4,53 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pet;
+use Illuminate\Support\Facades\Log;
 
 class PetMatchController extends Controller
 {
     public function matchPets(Request $request) 
  {
-    $preferences = $request->validate([
-    'species' => 'array|nullable',
-    'type' => 'array|nullable',
-    'gender' => 'string|nullable',
-    'age' => 'array|nullable',
-    'age.min' => 'integer|nullable',
-    'age.max' => 'integer|nullable',
-    'status' => 'string|nullable',
-    'keywords' => 'array|nullable',
-    ]);
+    // Use extractPreferences(UserPreferenceController) result to drive matching
+    // Expecting a 'user_message' in the request; if not present, fall back to prior validation shape
+    $preferences = null;
+    try {
+        if ($request->filled('user_message')) {
+            // Call the other controller method directly to reuse its normalization
+            $prefController = new UserPreferenceController();
+            $prefResponse = $prefController->extractPreferences($request);
 
-    // Set defaults if missing
+            if (method_exists($prefResponse, 'getStatusCode') && $prefResponse->getStatusCode() === 200) {
+                $payload = $prefResponse->getData(true);
+                $preferences = $payload['preferences'] ?? null;
+            }
+        }
+    } catch (\Throwable $e) {
+        Log::error('matchPets: failed to extract preferences: ' . $e->getMessage());
+    }
+
+    // Fallback: validate raw fields if AI extraction not used or failed
+    if ($preferences === null) {
+        $validated = $request->validate([
+            'species' => 'array|nullable',
+            'type' => 'array|nullable',
+            'gender' => 'string|nullable',
+            'age' => 'array|nullable',
+            'age.min' => 'integer|nullable',
+            'age.max' => 'integer|nullable',
+            'status' => 'string|nullable',
+            'keywords' => 'array|nullable',
+        ]);
+        $preferences = [
+            'species' => $validated['species'] ?? [],
+            'type' => $validated['type'] ?? [],
+            'gender' => $validated['gender'] ?? null,
+            'age' => $validated['age'] ?? ['min' => null, 'max' => null],
+            'status' => $validated['status'] ?? 'available',
+            'keywords' => $validated['keywords'] ?? [],
+        ];
+    }
+
+    // Ensure defaults and shapes
     $preferences['species'] = $preferences['species'] ?? [];
     $preferences['type'] = $preferences['type'] ?? [];
     $preferences['gender'] = $preferences['gender'] ?? null;
@@ -36,7 +66,7 @@ class PetMatchController extends Controller
             'pets' => [],
             'total' => 0,
             'message' => 'No available pets found at the moment 😔'
-        ], 200); // 200 = OK, même si vide (c’est une réponse normale)
+        ], 200);
     }
 
     $scoredPets = [];
@@ -66,9 +96,9 @@ foreach ($pets as $pet) {
         $score += 20;
     }
 
-    // Keywords in description (check if any keyword is in the pet's description)
+    // Keywords in description
     foreach ($preferences['keywords'] as $keyword) {
-        if (stripos($pet->description, $keyword) !== false) {
+        if (!empty($keyword) && stripos((string)($pet->description ?? ''), (string)$keyword) !== false) {
             $score += 10;
         }
     }
@@ -91,21 +121,11 @@ usort($scoredPets, function ($a, $b) {
     return $b['score'] <=> $a['score'];
 });
 
-    /*
-    // Optional: Filter out low scores (e.g., below 50)
-    $scoredPets = array_filter($scoredPets, function ($pet) {
-        return $pet['score'] >= 50;  // Adjust threshold
-    });
-
-    // Limit to top 10
-    $topPets = array_slice($scoredPets, 0, 10);
-    */
-    
     $allMatchingPets = $scoredPets; // all pets by score
 
     return response()->json([
             'pets' => $allMatchingPets,
-            'total' => count($allMatchingPets), // Bonus : on dit combien il y en a
+            'total' => count($allMatchingPets),
             'message' => 'Here are all available pets, sorted by match score 🐾'
         ]);
 
