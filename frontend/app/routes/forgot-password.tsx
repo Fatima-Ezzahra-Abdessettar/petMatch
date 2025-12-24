@@ -49,8 +49,8 @@ export default function ForgotPassword() {
           <img
             src={
               isDarkMode
-                ? "public/pet-MattchWhite.PNG"
-                : "public/pet-MattchBlack.PNG"
+                ? "public/pet-MatchWhite.png"
+                : "public/pet-MatchBlack.png"
             }
             alt="PetMatch"
             className="w-32"

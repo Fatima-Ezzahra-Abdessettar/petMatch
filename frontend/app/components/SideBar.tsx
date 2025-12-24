@@ -1,3 +1,4 @@
+//frontend/app/components/SideBar.tsx
 import React, { useContext } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
@@ -36,50 +37,85 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
     navigate('/login');
   };
 
-  const menuItems = [
-    { 
-      path: '/welcome-user', 
-      label: 'home', 
-      icon: HomeIcon, 
-      activeIcon: HomeIconSolid, 
-      type: 'heroicon' 
-    },
-    { 
-      path: '/requests', 
-      label: 'Requests', 
-      icon: ClipboardDocumentListIcon, 
-      activeIcon: ClipboardDocumentListIconSolid, 
-      type: 'heroicon' 
-    },
-    { 
-      path: '/pets-list', 
-      label: 'Pets', 
-      icon: faDog, 
-      activeIcon: faDog, 
-      type: 'fontawesome' 
-    },
-    { 
-      path: '/profile', 
-      label: 'profile', 
-      icon: UserCircleIcon, 
-      activeIcon: UserCircleIconSolid, 
-      type: 'heroicon' 
-    },
-    
-    { 
-      path: '/favorites', 
-      label: 'Favorites', 
-      icon: HeartIcon, 
-      activeIcon: HeartIconSolid, 
-      type: 'heroicon' 
-    },
-  ];
-
   // Get user info from UserContext (with fallback)
   const contextUser = userContext?.user;
   const userName = contextUser?.name || 'User';
   const userEmail = contextUser?.email || 'user@email.com';
   const userAvatar = contextUser?.avatar;
+
+  // Check if user is admin
+  const isAdmin = contextUser?.role === 'admin';
+
+  const userMenuItems = [
+    {
+      path: '/welcome-user',
+      label: 'home',
+      icon: HomeIcon,
+      activeIcon: HomeIconSolid,
+      type: 'heroicon'
+    },
+    {
+      path: '/requests',
+      label: 'Requests',
+      icon: ClipboardDocumentListIcon,
+      activeIcon: ClipboardDocumentListIconSolid,
+      type: 'heroicon'
+    },
+    {
+      path: '/pets-list',
+      label: 'Pets',
+      icon: faDog,
+      activeIcon: faDog,
+      type: 'fontawesome'
+    },
+    {
+      path: '/profile',
+      label: 'profile',
+      icon: UserCircleIcon,
+      activeIcon: UserCircleIconSolid,
+      type: 'heroicon'
+    },
+    {
+      path: '/favorites',
+      label: 'Favorites',
+      icon: HeartIcon,
+      activeIcon: HeartIconSolid,
+      type: 'heroicon'
+    },
+  ];
+
+  const adminMenuItems = [
+    {
+    path: '/admin/dashboard', // Add this
+    label: 'Dashboard',
+    icon: HomeIcon,
+    activeIcon: HomeIconSolid,
+    type: 'heroicon'
+  },
+    {
+      path: '/admin/requests',
+      label: 'Requests',
+      icon: ClipboardDocumentListIcon,
+      activeIcon: ClipboardDocumentListIconSolid,
+      type: 'heroicon'
+    },
+    {
+      path: '/admin/pets',
+      label: 'Pets',
+      icon: faDog,
+      activeIcon: faDog,
+      type: 'fontawesome'
+    },
+    {
+      path: '/admin/profile',
+      label: 'profile',
+      icon: UserCircleIcon,
+      activeIcon: UserCircleIconSolid,
+      type: 'heroicon'
+    },
+  ];
+
+  const menuItems = isAdmin ? adminMenuItems : userMenuItems;
 
   return (
     <>
@@ -96,7 +132,7 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-screen bg-[#D29059] flex flex-col transition-all duration-300 ease-in-out z-[100] overflow-hidden
+        className={`fixed left-0 top-0 h-screen bg-[#D29059] flex flex-col transition-all duration-300 ease-in-out z-40 overflow-hidden
           ${isOpen 
             ? 'w-52 lg:w-52' 
             : 'w-52 lg:w-20 -translate-x-full lg:translate-x-0'
@@ -127,7 +163,7 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
               <li key={item.path}>
                 <NavLink
                   to={item.path}
-                  className={({ isActive }) =>
+                  className={({ isActive }: { isActive: boolean }) =>
                     `flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-200 ${
                       isActive
                         ? 'bg-[#F3F0E8]/95 text-[#D29059] font-medium'
@@ -136,7 +172,7 @@ const SideBar: React.FC<SideBarProps> = ({ isOpen, toggleSidebar }) => {
                   }
                   title={!isOpen ? item.label : ''}
                 >
-                  {({ isActive }) => {
+                  {({ isActive }: { isActive: boolean })  => {
                     if (item.type === 'fontawesome') {
                       return (
                         <>

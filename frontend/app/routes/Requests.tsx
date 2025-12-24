@@ -60,7 +60,6 @@ export default function Requests() {
     if (!confirm('Are you sure you want to cancel this adoption request? This action cannot be undone.')) return;
     
     try {
-      // Use soft delete (cancel) - change to .delete() for hard delete
       await api.put(`/api/adoptions/${requestId}/cancel`);
       
       // Refresh the list
@@ -353,42 +352,23 @@ export default function Requests() {
                                 }}
                               >
                                 <div className="py-1">
-                                  {isPending && (
-                                    <>
-                                      <Link
-                                        to={`/pet/${request.pet_id}/adopt?edit=${request.id}`}
-                                        className="block px-4 py-2 text-sm transition-colors duration-300"
-                                        style={{
-                                          color: isDarkMode ? "#F7F5EA" : "#374151"
-                                        }}
-                                        onMouseEnter={(e) => {
-                                          e.currentTarget.style.backgroundColor = isDarkMode ? "rgba(115, 101, 91, 0.3)" : "#f9fafb";
-                                        }}
-                                        onMouseLeave={(e) => {
-                                          e.currentTarget.style.backgroundColor = "transparent";
-                                        }}
-                                        onClick={() => setShowOptionsMenu(null)}
-                                      >
-                                        Edit Request Form
-                                      </Link>
-                                      <button
-                                        onClick={() => handleCancel(request.id)}
-                                        className="block w-full text-left px-4 py-2 text-sm transition-colors duration-300"
-                                        style={{
-                                          color: isDarkMode ? "#fca5a5" : "#dc2626"
-                                        }}
-                                        onMouseEnter={(e) => {
-                                          e.currentTarget.style.backgroundColor = isDarkMode ? "rgba(220, 38, 38, 0.15)" : "#fee2e2";
-                                        }}
-                                        onMouseLeave={(e) => {
-                                          e.currentTarget.style.backgroundColor = "transparent";
-                                        }}
-                                      >
-                                        Cancel Request
-                                      </button>
-                                    </>
-                                  )}
-                                  {!isPending && (
+                                  {isPending ? (
+                                    <button
+                                      onClick={() => handleCancel(request.id)}
+                                      className="block w-full text-left px-4 py-2 text-sm transition-colors duration-300"
+                                      style={{
+                                        color: isDarkMode ? "#fca5a5" : "#dc2626"
+                                      }}
+                                      onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = isDarkMode ? "rgba(220, 38, 38, 0.15)" : "#fee2e2";
+                                      }}
+                                      onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = "transparent";
+                                      }}
+                                    >
+                                      Cancel Request
+                                    </button>
+                                  ) : (
                                     <div
                                       className="px-4 py-2 text-sm italic duration-300"
                                       style={{ color: isDarkMode ? "#D9915B" : "#9ca3af" }}

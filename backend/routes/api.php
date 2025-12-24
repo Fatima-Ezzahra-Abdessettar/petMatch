@@ -76,10 +76,15 @@ Route::middleware(['auth:sanctum', 'role:user'])->group(function () {
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
     // Pet management
     Route::get('/pets', [PetController::class, 'myPets']);
+    
+    // Dashboard routes - PUT THESE FIRST before {pet} route
+    Route::get('/pets/dashboard/stats', [PetController::class, 'stats']);
+    Route::get('/pets/dashboard/activity', [PetController::class, 'recentActivity']);
+    
     Route::post('/pets', [PetController::class, 'store']);
     Route::put('/pets/{pet}', [PetController::class, 'update']);
     Route::delete('/pets/{pet}', [PetController::class, 'destroy']);
-    Route::get('/pets/stats', [PetController::class, 'stats']);
+    Route::get('/pets/{pet}', [PetController::class, 'showForAdmin']); 
 
     // Adoption application management
     Route::get('/adoption-applications', [AdoptionApplicationController::class, 'forMyShelter']);

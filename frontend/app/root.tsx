@@ -34,7 +34,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="public/iconPaw.PNG" type="image/x-icon"></link>
+        <link rel="icon" href="public/iconPaw.png" type="image/x-icon"></link>
         <Meta />
         <Links />
       </head>
